@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { Button } from "./Button";
 import { Input } from "./Input";
@@ -39,7 +39,7 @@ interface InventoryTableProps {
   hideSearch?: boolean;
 }
 
-export const InventoryTable: React.FC<InventoryTableProps> = ({
+export const InventoryTable: React.FC<InventoryTableProps> = React.memo(({
   items,
   onEdit,
   onDelete,
@@ -56,14 +56,17 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
   const itemsPerPage = 10;
-  const totalPages = Math.ceil((totalItems || items.length) / itemsPerPage);
+  const totalPages = useMemo(
+    () => Math.ceil((totalItems || items.length) / itemsPerPage),
+    [items.length, totalItems]
+  );
 
-  const handleSearch = (value: string) => {
+  const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
     onSearch?.(value);
-  };
+  }, [onSearch]);
 
-  const handleSort = (field: SortField) => {
+  const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
       if (sortOrder === "asc") {
         setSortOrder("desc");
@@ -77,9 +80,9 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       setSortField(field);
       setSortOrder("asc");
     }
-  };
+  }, [sortField, sortOrder]);
 
-  const getSortedItems = () => {
+  const sortedItems = useMemo(() => {
     if (!sortField || !sortOrder) return items;
 
     return [...items].sort((a, b) => {
@@ -101,18 +104,16 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       }
       return left > right ? -1 : left < right ? 1 : 0;
     });
-  };
+  }, [items, sortField, sortOrder]);
 
-  const SortIcon = ({ field }: { field: SortField }) => {
+  const renderSortIcon = useCallback((field: SortField) => {
     if (sortField !== field || !sortOrder) {
       return <ArrowUpDown className="h-4 w-4 ml-1 text-muted-foreground" />;
     }
     return sortOrder === "asc"
       ? <ArrowUp className="h-4 w-4 ml-1 text-primary" />
       : <ArrowDown className="h-4 w-4 ml-1 text-primary" />;
-  };
-
-  const sortedItems = getSortedItems();
+  }, [sortField, sortOrder]);
 
   return (
     <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
@@ -147,7 +148,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   className="flex items-center hover:text-foreground transition-colors"
                 >
                   {language === "id" ? "Produk" : "Product"}
-                  <SortIcon field="name" />
+                  {renderSortIcon("name")}
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-foreground">
@@ -156,7 +157,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   className="flex items-center hover:text-foreground transition-colors"
                 >
                   SKU
-                  <SortIcon field="sku" />
+                  {renderSortIcon("sku")}
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-foreground">
@@ -168,7 +169,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   className="flex items-center justify-end w-full hover:text-foreground transition-colors"
                 >
                   {language === "id" ? "Harga" : "Price"}
-                  <SortIcon field="price" />
+                  {renderSortIcon("price")}
                 </button>
               </th>
               <th className="px-4 py-3 text-center text-sm font-medium text-foreground">
@@ -177,7 +178,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   className="flex items-center justify-center w-full hover:text-foreground transition-colors"
                 >
                   {t.products.stock}
-                  <SortIcon field="stock" />
+                  {renderSortIcon("stock")}
                 </button>
               </th>
               {showActions && (
@@ -308,4 +309,6 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       )}
     </div>
   );
-};
+});
+
+InventoryTable.displayName = "InventoryTable";

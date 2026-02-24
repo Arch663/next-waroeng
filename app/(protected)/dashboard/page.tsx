@@ -60,10 +60,24 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const cacheKey = "dashboard_cache_v1";
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached) as DashboardData;
+        setData(parsed);
+        setIsLoading(false);
+      } catch {
+        // ignore invalid cache
+      }
+    }
+
     const fetchDashboard = async () => {
       try {
         const response = await reportsAPI.getDashboard();
-        setData(response.data.data);
+        const payload = response.data.data as DashboardData;
+        setData(payload);
+        sessionStorage.setItem(cacheKey, JSON.stringify(payload));
       } catch (error) {
         console.error("Failed to fetch dashboard:", error);
       } finally {
@@ -112,44 +126,17 @@ export default function DashboardPage() {
 
   const chartData = {
     labels: data.last7Days.map((d) => new Date(d.date).toLocaleDateString("id-ID", { weekday: "short" })),
-    datasets: [
-      {
-        label: "Revenue",
-        data: data.last7Days.map((d) => d.revenue),
-        backgroundColor: c1,
-        borderColor: c2,
-        borderWidth: 1,
-        borderRadius: 6,
-      },
-    ],
+    datasets: [{ label: "Revenue", data: data.last7Days.map((d) => d.revenue), backgroundColor: c1, borderColor: c2, borderWidth: 1, borderRadius: 6 }],
   };
+
   const salesLineData = {
     labels: data.last7Days.map((d) => new Date(d.date).toLocaleDateString("id-ID", { weekday: "short" })),
-    datasets: [
-      {
-        label: "Sales",
-        data: data.last7Days.map((d) => d.sales),
-        borderColor: c4,
-        backgroundColor: c2,
-        tension: 0.35,
-        fill: true,
-        pointRadius: 3,
-      },
-    ],
+    datasets: [{ label: "Sales", data: data.last7Days.map((d) => d.sales), borderColor: c4, backgroundColor: c2, tension: 0.35, fill: true, pointRadius: 3 }],
   };
+
   const stockHealthData = {
     labels: [tr("Healthy Stock", "Stok Aman"), tr("Low Stock", "Stok Rendah")],
-    datasets: [
-      {
-        data: [
-          Math.max(data.overview.totalProducts - data.overview.lowStockProducts, 0),
-          data.overview.lowStockProducts,
-        ],
-        backgroundColor: [c4, c3],
-        borderColor: [c4, c3],
-        borderWidth: 1,
-      },
-    ],
+    datasets: [{ data: [Math.max(data.overview.totalProducts - data.overview.lowStockProducts, 0), data.overview.lowStockProducts], backgroundColor: [c4, c3], borderColor: [c4, c3], borderWidth: 1 }],
   };
 
   const chartOptions = {

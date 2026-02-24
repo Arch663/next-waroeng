@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ProductCard, type Product } from "@/components/ui/ProductCard";
 import { InventoryTable, type InventoryItem } from "@/components/ui/InventoryTable";
 import { Modal } from "@/components/ui/Modal";
@@ -51,7 +51,9 @@ export default function ProductsPage() {
   const [selectedProductForCart, setSelectedProductForCart] = useState<Product | null>(null);
   const [selectedQty, setSelectedQty] = useState("1");
 
-  const { items, addItem, updateQuantity } = useCartStore();
+  const items = useCartStore((state) => state.items);
+  const addItem = useCartStore((state) => state.addItem);
+  const updateQuantity = useCartStore((state) => state.updateQuantity);
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
@@ -84,7 +86,7 @@ export default function ProductsPage() {
     fetchCategories();
   }, [fetchProducts, fetchCategories]);
 
-  const handleOpenModal = (product?: Product) => {
+  const handleOpenModal = useCallback((product?: Product) => {
     if (product) {
       setEditingProduct(product);
       setFormData({
@@ -113,9 +115,9 @@ export default function ProductsPage() {
       });
     }
     setIsProductModalOpen(true);
-  };
+  }, [categories]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const data = {
@@ -140,9 +142,9 @@ export default function ProductsPage() {
     } catch (error) {
       console.error("Failed to save product:", error);
     }
-  };
+  }, [editingProduct, fetchProducts, formData]);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!deleteId) return;
     try {
       await productsAPI.delete(deleteId);
@@ -151,15 +153,15 @@ export default function ProductsPage() {
     } catch (error) {
       console.error("Failed to delete product:", error);
     }
-  };
+  }, [deleteId, fetchProducts]);
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = useCallback((product: Product) => {
     setSelectedProductForCart(product);
     setSelectedQty("1");
     setIsQtyModalOpen(true);
-  };
+  }, []);
 
-  const handleConfirmAddToCart = () => {
+  const handleConfirmAddToCart = useCallback(() => {
     if (!selectedProductForCart) return;
     const qty = Math.max(1, Math.min(Number(selectedQty) || 1, selectedProductForCart.stock));
     const existingItem = items.find((item) => item.productId === selectedProductForCart._id);
@@ -177,7 +179,15 @@ export default function ProductsPage() {
     setIsQtyModalOpen(false);
     setSelectedProductForCart(null);
     setSelectedQty("1");
-  };
+  }, [addItem, items, selectedProductForCart, selectedQty, updateQuantity]);
+
+  const productGrid = useMemo(
+    () =>
+      products.map((product) => (
+        <ProductCard key={product._id} product={product} onAddToCart={handleAddToCart} />
+      )),
+    [products, handleAddToCart]
+  );
 
   return (
     <div className="space-y-6">
@@ -258,13 +268,7 @@ export default function ProductsPage() {
           </div>
         ) : viewMode === "grid" ? (
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard
-                key={product._id}
-                product={product}
-                onAddToCart={handleAddToCart}
-              />
-            ))}
+            {productGrid}
           </div>
         ) : (
           <InventoryTable
