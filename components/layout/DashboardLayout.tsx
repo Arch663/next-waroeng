@@ -43,6 +43,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   }, [router, setSidebarOpen]);
 
   useEffect(() => {
+    const currentPath = pathname ?? "";
     const routeMap: Record<string, { en: string; id: string }> = {
       "/dashboard": { en: "Dashboard", id: "Dasbor" },
       "/products": { en: "Products", id: "Produk" },
@@ -55,7 +56,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       "/users": { en: "Users", id: "Pengguna" },
       "/settings": { en: "Settings", id: "Pengaturan" },
     };
-    const routeTitle = routeMap[pathname]?.[language] ?? (language === "id" ? "Aplikasi" : "App");
+    const routeTitle = routeMap[currentPath]?.[language] ?? (language === "id" ? "Aplikasi" : "App");
     document.title = `Waroeng - ${routeTitle}`;
   }, [pathname, language]);
 
