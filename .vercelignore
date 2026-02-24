@@ -1,0 +1,6 @@
+server/**
+node_modules/**
+.next/**
+out/**
+build/**
+*.log

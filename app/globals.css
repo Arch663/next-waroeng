@@ -1,26 +1,125 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Eva-02 Light with 70/30/10: 70% warm neutral, 30% orange-red primary, 10% accent */
+  --background: #fff6f2;
+  --background-secondary: #ffede5;
+  --foreground: #2c1713;
+  --foreground-secondary: #7f5046;
+  --border: #f0c8bb;
+  --primary: #d6452b;
+  --primary-hover: #b93823;
+  --primary-foreground: #fff7f3;
+  --destructive: #a61e1e;
+  --destructive-hover: #8f1818;
+  --success: #3f8c4f;
+  --warning: #e18a19;
+  --muted: #f8dfd4;
+  --muted-foreground: #8d6057;
+  --card: #fffaf8;
+  --card-foreground: #2c1713;
+  --input: #e7b6a7;
+  --ring: #e65a34;
+
+  --chart-1: #d6452b;
+  --chart-2: #ef7b45;
+  --chart-3: #e18a19;
+  --chart-4: #3f8c4f;
+  --chart-5: #a61e1e;
+}
+
+.dark {
+  /* Eva-01 Dark with 70/30/10: 70% dark neutral, 30% purple primary, 10% green/amber accent */
+  --background: #110d1a;
+  --background-secondary: #191327;
+  --foreground: #eee7ff;
+  --foreground-secondary: #b8adc8;
+  --border: #302444;
+  --primary: #7d58c2;
+  --primary-hover: #6b48ae;
+  --primary-foreground: #f8f3ff;
+  --destructive: #e14b56;
+  --destructive-hover: #c53f49;
+  --success: #8ecf4f;
+  --warning: #d5a72a;
+  --muted: #211932;
+  --muted-foreground: #ab9fc0;
+  --card: #191327;
+  --card-foreground: #eee7ff;
+  --input: #382b50;
+  --ring: #98df5e;
+
+  --chart-1: #7d58c2;
+  --chart-2: #9d7edb;
+  --chart-3: #d5a72a;
+  --chart-4: #8ecf4f;
+  --chart-5: #e14b56;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
   --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-hover: var(--destructive-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--border);
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--primary) 10%, transparent) 0%, transparent 40%),
+    linear-gradient(180deg, var(--background-secondary) 0%, var(--background) 45%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted-foreground) 70%, transparent);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-secondary);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 }
