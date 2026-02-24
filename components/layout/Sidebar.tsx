@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUIStore, useAuthStore } from "@/lib/store";
@@ -20,13 +20,14 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-export const Sidebar: React.FC = () => {
+export const Sidebar: React.FC = React.memo(function Sidebar() {
   const pathname = usePathname();
-  const { sidebarOpen, setSidebarOpen } = useUIStore();
-  const { user } = useAuthStore();
+  const sidebarOpen = useUIStore((state) => state.sidebarOpen);
+  const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
+  const user = useAuthStore((state) => state.user);
   const { t, language } = useLanguage();
 
-  const getNavigation = () => {
+  const navigation = useMemo(() => {
     const baseNav = [
       { name: t.dashboard.title, href: "/dashboard", icon: LayoutDashboard },
     ];
@@ -46,9 +47,7 @@ export const Sidebar: React.FC = () => {
     baseNav.push({ name: t.common.settings, href: "/settings", icon: Settings })
 
     return baseNav;
-  };
-
-  const navigation = getNavigation();
+  }, [language, t, user?.role]);
 
   useEffect(() => {
     const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
@@ -201,4 +200,4 @@ export const Sidebar: React.FC = () => {
       </aside>
     </>
   );
-};
+});

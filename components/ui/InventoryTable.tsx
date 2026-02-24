@@ -39,7 +39,7 @@ interface InventoryTableProps {
   hideSearch?: boolean;
 }
 
-export const InventoryTable: React.FC<InventoryTableProps> = ({
+export const InventoryTable: React.FC<InventoryTableProps> = React.memo(({
   items,
   onEdit,
   onDelete,
@@ -103,7 +103,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     });
   };
 
-  const SortIcon = ({ field }: { field: SortField }) => {
+  const renderSortIcon = (field: SortField) => {
     if (sortField !== field || !sortOrder) {
       return <ArrowUpDown className="h-4 w-4 ml-1 text-muted-foreground" />;
     }
@@ -147,7 +147,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   className="flex items-center hover:text-foreground transition-colors"
                 >
                   {language === "id" ? "Produk" : "Product"}
-                  <SortIcon field="name" />
+                  {renderSortIcon("name")}
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-foreground">
@@ -156,7 +156,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   className="flex items-center hover:text-foreground transition-colors"
                 >
                   SKU
-                  <SortIcon field="sku" />
+                  {renderSortIcon("sku")}
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-foreground">
@@ -168,7 +168,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   className="flex items-center justify-end w-full hover:text-foreground transition-colors"
                 >
                   {language === "id" ? "Harga" : "Price"}
-                  <SortIcon field="price" />
+                  {renderSortIcon("price")}
                 </button>
               </th>
               <th className="px-4 py-3 text-center text-sm font-medium text-foreground">
@@ -177,7 +177,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   className="flex items-center justify-center w-full hover:text-foreground transition-colors"
                 >
                   {t.products.stock}
-                  <SortIcon field="stock" />
+                  {renderSortIcon("stock")}
                 </button>
               </th>
               {showActions && (
@@ -308,4 +308,6 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       )}
     </div>
   );
-};
+});
+
+InventoryTable.displayName = "InventoryTable";

@@ -15,8 +15,10 @@ interface DashboardLayoutProps {
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const router = useRouter();
-  const { isAuthenticated, token } = useAuthStore();
-  const { sidebarOpen, setSidebarOpen } = useUIStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const token = useAuthStore((state) => state.token);
+  const sidebarOpen = useUIStore((state) => state.sidebarOpen);
+  const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
   const [isLoading, setIsLoading] = React.useState(true);
 
   useEffect(() => {

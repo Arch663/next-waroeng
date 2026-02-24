@@ -9,9 +9,10 @@ import { Menu, Sun, Moon, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Header: React.FC = () => {
-  const { sidebarOpen, toggleSidebar } = useUIStore();
+  const sidebarOpen = useUIStore((state) => state.sidebarOpen);
+  const toggleSidebar = useUIStore((state) => state.toggleSidebar);
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
   const { language } = useLanguage();
 
   return (
@@ -82,3 +83,5 @@ export const Header: React.FC = () => {
     </header>
   );
 };
+
+export default React.memo(Header);
