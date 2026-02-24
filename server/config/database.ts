@@ -1,35 +1,36 @@
 import mongoose from 'mongoose';
 
+let isConnected = false;
+
 export const connectDB = async (): Promise<void> => {
-  try {
-    const mongoURI = process.env.MONGODB_URI;
-    
-    if (!mongoURI) {
-      throw new Error('MONGODB_URI is not defined in environment variables');
-    }
+  if (isConnected || mongoose.connection.readyState === 1) {
+    return;
+  }
 
-    const conn = await mongoose.connect(mongoURI);
-    
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-    
-    // Handle connection events
-    mongoose.connection.on('error', (err) => {
-      console.error('❌ MongoDB connection error:', err);
-    });
+  const mongoURI = process.env.MONGODB_URI;
+  if (!mongoURI) {
+    throw new Error('MONGODB_URI is not defined in environment variables');
+  }
 
-    mongoose.connection.on('disconnected', () => {
-      console.warn('⚠️ MongoDB disconnected');
-    });
+  const conn = await mongoose.connect(mongoURI);
+  isConnected = true;
+  console.log(`MongoDB Connected: ${conn.connection.host}`);
 
-    // Graceful shutdown
+  mongoose.connection.on('error', (err) => {
+    console.error('MongoDB connection error:', err);
+  });
+
+  mongoose.connection.on('disconnected', () => {
+    isConnected = false;
+    console.warn('MongoDB disconnected');
+  });
+
+  if (process.env.VERCEL !== '1') {
     process.on('SIGINT', async () => {
       await mongoose.connection.close();
-      console.log('📦 MongoDB connection closed through app termination');
+      console.log('MongoDB connection closed through app termination');
       process.exit(0);
     });
-
-  } catch (error) {
-    console.error('❌ Error connecting to MongoDB:', error);
-    process.exit(1);
   }
 };
+

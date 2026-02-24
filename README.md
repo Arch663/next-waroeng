@@ -109,28 +109,31 @@ The application will be available at:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
 
-## ▲ Vercel Deployment (Frontend)
+## ▲ Vercel Deployment (Single Project: Frontend + API)
 
-Use this when deploying the Next.js app to Vercel and backend to another host (Railway/Render/VPS).
+This project can run on Vercel only (no separate backend host) using the built-in API function.
 
-### 1. Required environment variable in Vercel
+### 1. Set environment variables in Vercel
 
-Set this in Vercel Project Settings -> Environment Variables:
+Project Settings -> Environment Variables:
 
 ```env
-NEXT_PUBLIC_API_URL=https://your-backend-domain.com/api
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/waroeng
+JWT_SECRET=your-super-secret-jwt-key
+NODE_ENV=production
+NEXT_PUBLIC_API_URL=
 ```
 
-### 2. Import project
+Notes:
+- Keep `NEXT_PUBLIC_API_URL` empty to use same-domain `/api`.
+- All Express routes are exposed under `/api/*` in Vercel.
+
+### 2. Deploy
 
 - Import this repository to Vercel.
-- Root Directory: project root (`waroeng`).
 - Framework Preset: Next.js.
 - Build Command: `npm run build`.
-
-### 3. Deploy
-
-After env is set, redeploy. No code changes are needed for production URL switching.
+- Redeploy after setting envs.
 
 ## 📁 Project Structure
 
