@@ -17,6 +17,5 @@ export const config = {
 
 export default async function apiHandler(req: NextApiRequest, res: NextApiResponse) {
   await connectDB();
-  return handler(req, res) as Promise<void>;
+  await handler(req, res);
 }
-
