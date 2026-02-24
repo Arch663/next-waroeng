@@ -31,6 +31,7 @@ api.interceptors.response.use(
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+        document.cookie = "auth_token=; path=/; max-age=0; samesite=lax";
         window.location.href = "/login";
       }
     }

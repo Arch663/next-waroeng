@@ -67,6 +67,7 @@ export default function RegisterPage() {
       login(user, token);
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
+      document.cookie = `auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; samesite=lax`;
       router.push("/dashboard");
     } catch (err: unknown) {
       let errorMessage = tr("Failed to register user", "Gagal mendaftarkan pengguna");

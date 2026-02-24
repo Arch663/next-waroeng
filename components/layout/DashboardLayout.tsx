@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore, useUIStore } from "@/lib/store";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { LowStockAlert } from "@/components/layout/LowStockAlert";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,8 @@ interface DashboardLayoutProps {
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const { language } = useLanguage();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const token = useAuthStore((state) => state.token);
   const sidebarOpen = useUIStore((state) => state.sidebarOpen);
@@ -38,6 +41,23 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
     checkAuth();
   }, [router, setSidebarOpen]);
+
+  useEffect(() => {
+    const routeMap: Record<string, { en: string; id: string }> = {
+      "/dashboard": { en: "Dashboard", id: "Dasbor" },
+      "/products": { en: "Products", id: "Produk" },
+      "/inventory": { en: "Inventory", id: "Inventaris" },
+      "/checkout": { en: "Checkout", id: "Kasir" },
+      "/purchases": { en: "Purchases", id: "Pembelian" },
+      "/suppliers": { en: "Suppliers", id: "Supplier" },
+      "/reports": { en: "Reports", id: "Laporan" },
+      "/categories": { en: "Categories", id: "Kategori" },
+      "/users": { en: "Users", id: "Pengguna" },
+      "/settings": { en: "Settings", id: "Pengaturan" },
+    };
+    const routeTitle = routeMap[pathname]?.[language] ?? (language === "id" ? "Aplikasi" : "App");
+    document.title = `Waroeng - ${routeTitle}`;
+  }, [pathname, language]);
 
   if (isLoading) {
     return (

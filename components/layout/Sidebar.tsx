@@ -125,6 +125,7 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
               onClick={() => {
                 localStorage.removeItem("token");
                 localStorage.removeItem("user");
+                document.cookie = "auth_token=; path=/; max-age=0; samesite=lax";
               }}
             >
               <LogOut className="h-5 w-5 shrink-0" />
@@ -189,6 +190,7 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
               onClick={() => {
                 localStorage.removeItem("token");
                 localStorage.removeItem("user");
+                document.cookie = "auth_token=; path=/; max-age=0; samesite=lax";
               }}
               title={!sidebarOpen ? t.common.logout : undefined}
             >
