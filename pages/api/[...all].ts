@@ -10,7 +10,16 @@ export const config = {
 };
 
 export default async function apiHandler(req: NextApiRequest, res: NextApiResponse) {
-  await connectDB();
+  try {
+    await connectDB();
+  } catch (error) {
+    console.error('API bootstrap error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Database connection failed',
+      error: process.env.NODE_ENV === 'development' ? String(error) : undefined,
+    });
+  }
 
   await new Promise<void>((resolve, reject) => {
     res.on('finish', () => resolve());
@@ -27,4 +36,3 @@ export default async function apiHandler(req: NextApiRequest, res: NextApiRespon
     });
   });
 }
-
