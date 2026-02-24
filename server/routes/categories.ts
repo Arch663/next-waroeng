@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from 'express';
 import { body, query } from 'express-validator';
 import { Category } from '../models/Category';

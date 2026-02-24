@@ -1,12 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import serverless from 'serverless-http';
-import dotenv from 'dotenv';
 import { app } from '../../server/app';
 import { connectDB } from '../../server/config/database';
-
-dotenv.config();
-
-const handler = serverless(app);
 
 export const config = {
   api: {
@@ -17,5 +11,20 @@ export const config = {
 
 export default async function apiHandler(req: NextApiRequest, res: NextApiResponse) {
   await connectDB();
-  await handler(req, res);
+
+  await new Promise<void>((resolve, reject) => {
+    res.on('finish', () => resolve());
+    res.on('error', reject);
+
+    const expressApp = app as unknown as (
+      req: NextApiRequest,
+      res: NextApiResponse,
+      next: (err?: unknown) => void
+    ) => void;
+
+    expressApp(req, res, (err?: unknown) => {
+      if (err) reject(err);
+    });
+  });
 }
+
