@@ -62,6 +62,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const cacheKey = "dashboard_cache_v1";
     const cached = sessionStorage.getItem(cacheKey);
+
     if (cached) {
       try {
         const parsed = JSON.parse(cached) as DashboardData;
@@ -126,39 +127,55 @@ export default function DashboardPage() {
 
   const chartData = {
     labels: data.last7Days.map((d) => new Date(d.date).toLocaleDateString("id-ID", { weekday: "short" })),
-    datasets: [{ label: "Revenue", data: data.last7Days.map((d) => d.revenue), backgroundColor: c1, borderColor: c2, borderWidth: 1, borderRadius: 6 }],
+    datasets: [
+      {
+        label: "Revenue",
+        data: data.last7Days.map((d) => d.revenue),
+        backgroundColor: c1,
+        borderColor: c2,
+        borderWidth: 1,
+        borderRadius: 6,
+      },
+    ],
   };
 
   const salesLineData = {
     labels: data.last7Days.map((d) => new Date(d.date).toLocaleDateString("id-ID", { weekday: "short" })),
-    datasets: [{ label: "Sales", data: data.last7Days.map((d) => d.sales), borderColor: c4, backgroundColor: c2, tension: 0.35, fill: true, pointRadius: 3 }],
+    datasets: [
+      {
+        label: "Sales",
+        data: data.last7Days.map((d) => d.sales),
+        borderColor: c4,
+        backgroundColor: c2,
+        tension: 0.35,
+        fill: true,
+        pointRadius: 3,
+      },
+    ],
   };
 
   const stockHealthData = {
     labels: [tr("Healthy Stock", "Stok Aman"), tr("Low Stock", "Stok Rendah")],
-    datasets: [{ data: [Math.max(data.overview.totalProducts - data.overview.lowStockProducts, 0), data.overview.lowStockProducts], backgroundColor: [c4, c3], borderColor: [c4, c3], borderWidth: 1 }],
+    datasets: [
+      {
+        data: [
+          Math.max(data.overview.totalProducts - data.overview.lowStockProducts, 0),
+          data.overview.lowStockProducts,
+        ],
+        backgroundColor: [c4, c3],
+        borderColor: [c4, c3],
+        borderWidth: 1,
+      },
+    ],
   };
 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
+    plugins: { legend: { display: false } },
     scales: {
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: border,
-        },
-      },
-      x: {
-        grid: {
-          display: false,
-        },
-      },
+      y: { beginAtZero: true, grid: { color: border } },
+      x: { grid: { display: false } },
     },
   };
 
@@ -171,32 +188,11 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title={tr("Total Products", "Total Produk")}
-          value={data.overview.totalProducts}
-          icon={<Package className="h-6 w-6" />}
-          variant="default"
-        />
-        <StatCard
-          title={t.dashboard.lowStock}
-          value={data.overview.lowStockProducts}
-          icon={<AlertTriangle className="h-6 w-6" />}
-          variant="default"
-        />
-        <StatCard
-          title={tr("Today's Revenue", "Pendapatan Hari Ini")}
-          value={formatCurrency(data.overview.todayRevenue)}
-          icon={<DollarSign className="h-6 w-6" />}
-          variant="default"
-        />
-        <StatCard
-          title={tr("Today's Sales", "Penjualan Hari Ini")}
-          value={data.overview.todaySalesCount}
-          icon={<ShoppingCart className="h-6 w-6" />}
-          variant="default"
-        />
+        <StatCard title={tr("Total Products", "Total Produk")} value={data.overview.totalProducts} icon={<Package className="h-6 w-6" />} variant="default" />
+        <StatCard title={t.dashboard.lowStock} value={data.overview.lowStockProducts} icon={<AlertTriangle className="h-6 w-6" />} variant="default" />
+        <StatCard title={tr("Today's Revenue", "Pendapatan Hari Ini")} value={formatCurrency(data.overview.todayRevenue)} icon={<DollarSign className="h-6 w-6" />} variant="default" />
+        <StatCard title={tr("Today's Sales", "Penjualan Hari Ini")} value={data.overview.todaySalesCount} icon={<ShoppingCart className="h-6 w-6" />} variant="default" />
       </div>
 
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
@@ -204,7 +200,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-                {tr("Last 7 Days Revenue", "Pendapatan 7 Hari Terakhir")}
+              {tr("Last 7 Days Revenue", "Pendapatan 7 Hari Terakhir")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -215,14 +211,11 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-              <CardTitle>{tr("Stock Health", "Kondisi Stok")}</CardTitle>
+            <CardTitle>{tr("Stock Health", "Kondisi Stok")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-72 sm:h-80">
-              <Doughnut
-                data={stockHealthData}
-                options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" as const } } }}
-              />
+              <Doughnut data={stockHealthData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" as const } } }} />
             </div>
           </CardContent>
         </Card>
@@ -230,7 +223,7 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader>
-            <CardTitle>{tr("Last 7 Days Sales Trend", "Tren Penjualan 7 Hari Terakhir")}</CardTitle>
+          <CardTitle>{tr("Last 7 Days Sales Trend", "Tren Penjualan 7 Hari Terakhir")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-72 sm:h-80">
@@ -250,7 +243,6 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Monthly Summary */}
       <Card>
         <CardHeader>
           <CardTitle>{tr("Monthly Summary", "Ringkasan Bulanan")}</CardTitle>
@@ -258,16 +250,12 @@ export default function DashboardPage() {
         <CardContent>
           <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
             <div className="p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">{tr("Monthly Revenue", "Pendapatan Bulanan")}</p>
-              <p className="text-2xl font-bold text-primary mt-1">
-                {formatCurrency(data.overview.monthRevenue)}
-              </p>
+              <p className="text-sm text-muted-foreground">{tr("Monthly Revenue", "Pendapatan Bulanan")}</p>
+              <p className="text-2xl font-bold text-primary mt-1">{formatCurrency(data.overview.monthRevenue)}</p>
             </div>
             <div className="p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">{tr("Daily Average", "Rata-rata Harian")}</p>
-              <p className="text-2xl font-bold mt-1">
-                {formatCurrency(data.overview.monthRevenue / 30)}
-              </p>
+              <p className="text-sm text-muted-foreground">{tr("Daily Average", "Rata-rata Harian")}</p>
+              <p className="text-2xl font-bold mt-1">{formatCurrency(data.overview.monthRevenue / 30)}</p>
             </div>
           </div>
         </CardContent>
@@ -275,3 +263,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
