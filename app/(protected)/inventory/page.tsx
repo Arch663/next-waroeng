@@ -250,8 +250,8 @@ function InventoryContent() {
                       <td className="px-4 py-3 font-medium">{item.productName}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] uppercase font-bold ${item.type === 'sold' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                            item.type === 'bought' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                              'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                          item.type === 'bought' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                           }`}>
                           {item.type}
                         </span>
@@ -338,15 +338,55 @@ function InventoryContent() {
 function InventorySkeleton({ tr, t }: { tr: any; t: any }) {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <Skeleton variant="rectangular" className="h-10 w-48" />
-          <Skeleton variant="rectangular" className="h-4 w-64 mt-2" />
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="space-y-2">
+          <Skeleton variant="rectangular" className="h-10 w-64" />
+          <Skeleton variant="rectangular" className="h-4 w-80" />
         </div>
-        <Skeleton variant="rectangular" className="h-10 w-32" />
+        <Skeleton variant="rectangular" className="h-10 w-40" />
       </div>
-      <Card><CardContent className="pt-6"><Skeleton variant="rectangular" className="h-12 w-full" /></CardContent></Card>
-      <Card><CardContent className="pt-6"><div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => (<Skeleton key={i} variant="rectangular" className="h-14 w-full" />))}</div></CardContent></Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3 flex-wrap">
+            <Skeleton variant="rectangular" className="h-11 flex-1 min-w-[260px]" />
+            <Skeleton variant="rectangular" className="h-11 w-full sm:w-48" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="py-4 border-b border-border/50">
+          <Skeleton variant="rectangular" className="h-6 w-48" />
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="space-y-0">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-4 border-b border-border/50 last:border-0">
+                <div className="flex-1 space-y-2">
+                  <Skeleton variant="rectangular" className="h-5 w-48" />
+                  <Skeleton variant="rectangular" className="h-3 w-24" />
+                </div>
+                <div className="flex gap-4">
+                  <Skeleton variant="rectangular" className="h-8 w-16" />
+                  <Skeleton variant="rectangular" className="h-8 w-16" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><Skeleton variant="rectangular" className="h-6 w-56" /></CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} variant="rectangular" className="h-12 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

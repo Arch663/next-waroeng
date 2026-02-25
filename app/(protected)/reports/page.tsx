@@ -344,11 +344,45 @@ function ReportsContent() {
 function ReportsSkeleton({ tr }: { tr: any }) {
   return (
     <div className="space-y-6">
-      <Skeleton variant="rectangular" className="h-10 w-48" />
-      <div className="grid gap-4 md:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (<Skeleton key={i} variant="rectangular" className="h-24" />))}
+      <div className="flex flex-col gap-4">
+        <div className="space-y-2">
+          <Skeleton variant="rectangular" className="h-10 w-48" />
+          <Skeleton variant="rectangular" className="h-4 w-64" />
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Skeleton variant="rectangular" className="h-10 w-48" />
+          <Skeleton variant="rectangular" className="h-10 w-48" />
+          <Skeleton variant="rectangular" className="h-10 w-32 ml-auto" />
+        </div>
       </div>
-      <Skeleton variant="rectangular" className="h-80 w-full" />
+
+      <div className="flex gap-2 border-b border-border p-1">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} variant="rectangular" className="h-9 w-24 rounded-lg" />
+        ))}
+      </div>
+
+      <div className="space-y-6">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <Skeleton variant="rectangular" className="h-12 w-12 rounded-lg" />
+                  <div className="space-y-2">
+                    <Skeleton variant="rectangular" className="h-3 w-24" />
+                    <Skeleton variant="rectangular" className="h-6 w-32" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardHeader><Skeleton variant="rectangular" className="h-6 w-64" /></CardHeader>
+          <CardContent><Skeleton variant="rectangular" className="h-80 w-full" /></CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

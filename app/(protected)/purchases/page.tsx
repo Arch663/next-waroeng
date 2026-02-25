@@ -75,21 +75,21 @@ function PurchasesContent() {
       });
       const data = response.data.data;
       let purchasesData = data.purchases || data;
-      
+
       // Client-side search filter
       if (searchTerm) {
         purchasesData = purchasesData.filter((p: Purchase) =>
           p.supplierName.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
-      
+
       // Client-side sort
       purchasesData.sort((a: Purchase, b: Purchase) => {
         const dateA = new Date(a.createdAt).getTime();
         const dateB = new Date(b.createdAt).getTime();
         return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
       });
-      
+
       setPurchases(purchasesData);
       setTotalPages(data.pagination?.pages || 1);
     } catch (error) {
@@ -414,55 +414,59 @@ function PurchasesContent() {
               </Button>
             </div>
 
-            {purchaseItems.map((item, index) => (
-              <div key={index} className="flex gap-2 items-center">
-                <select
-                  value={item.productId}
-                  onChange={(e) =>
-                    handleUpdateItem(index, "productId", e.target.value)
-                  }
-                  className="flex-1 px-3 py-2 bg-card border border-input rounded-xl text-foreground text-sm"
-                >
-                  <option value="">{tr("Select Product", "Pilih Produk")}</option>
-                  {products.map((p) => (
-                    <option key={p._id} value={p._id}>
-                      {p.name} ({t.products.stock}: {p.stock})
-                    </option>
-                  ))}
-                </select>
-                <Input
-                  type="number"
-                  placeholder={tr("Qty", "Jml")}
-                  min={1}
-                  step={1}
-                  value={item.quantity || ""}
-                  onChange={(e) =>
-                    handleUpdateItem(index, "quantity", Math.max(0, Number(e.target.value) || 0))
-                  }
-                  className="w-20"
-                />
-                <Input
-                  type="number"
-                  placeholder={tr("Price", "Harga")}
-                  min={0}
-                  step="any"
-                  value={item.buyPrice || ""}
-                  onChange={(e) =>
-                    handleUpdateItem(index, "buyPrice", Math.max(0, Number(e.target.value) || 0))
-                  }
-                  className="w-24"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemoveItem(index)}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
+            <div className="space-y-4 max-h-[40vh] overflow-y-auto px-1 -mx-1 custom-scrollbar">
+              {purchaseItems.map((item, index) => (
+                <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center p-4 bg-muted/40 sm:bg-transparent rounded-xl border sm:border-0 border-border">
+                  <select
+                    value={item.productId}
+                    onChange={(e) =>
+                      handleUpdateItem(index, "productId", e.target.value)
+                    }
+                    className="flex-1 w-full px-4 py-2 bg-card border border-input rounded-xl text-foreground text-sm h-11"
+                  >
+                    <option value="">{tr("Select Product", "Pilih Produk")}</option>
+                    {products.map((p) => (
+                      <option key={p._id} value={p._id}>
+                        {p.name} ({t.products.stock}: {p.stock})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <Input
+                      type="number"
+                      placeholder={tr("Qty", "Jml")}
+                      min={1}
+                      step={1}
+                      value={item.quantity || ""}
+                      onChange={(e) =>
+                        handleUpdateItem(index, "quantity", Math.max(0, Number(e.target.value) || 0))
+                      }
+                      className="flex-1 sm:w-20"
+                    />
+                    <Input
+                      type="number"
+                      placeholder={tr("Price", "Harga")}
+                      min={0}
+                      step="any"
+                      value={item.buyPrice || ""}
+                      onChange={(e) =>
+                        handleUpdateItem(index, "buyPrice", Math.max(0, Number(e.target.value) || 0))
+                      }
+                      className="flex-1 sm:w-32"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveItem(index)}
+                      className="text-destructive hover:text-destructive shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {purchaseItems.length > 0 && (
@@ -523,19 +527,63 @@ function PurchasesContent() {
   );
 }
 
-export default function PurchasesPage() {
+function PurchaseCardSkeleton() {
   return (
-    <Suspense fallback={
-      <div className="space-y-6">
-        <Skeleton variant="rectangular" className="h-10 w-48" />
-        <Skeleton variant="rectangular" className="h-12 w-full" />
-        <div className="space-y-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} variant="rectangular" className="h-24" />
-          ))}
+    <div className="p-4 bg-muted rounded-xl border border-border space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <Skeleton variant="rectangular" className="h-5 w-32" />
+          <Skeleton variant="rectangular" className="h-4 w-24" />
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-right space-y-1">
+            <Skeleton variant="rectangular" className="h-6 w-24" />
+            <Skeleton variant="rectangular" className="h-4 w-12 ml-auto" />
+          </div>
+          <Skeleton variant="rectangular" className="h-8 w-8" />
         </div>
       </div>
-    }>
+      <div className="space-y-2">
+        <Skeleton variant="rectangular" className="h-4 w-full" />
+        <Skeleton variant="rectangular" className="h-4 w-full" />
+      </div>
+    </div>
+  );
+}
+
+function PurchasesSkeleton({ t }: { t: any }) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="space-y-2">
+          <Skeleton variant="rectangular" className="h-10 w-48" />
+          <Skeleton variant="rectangular" className="h-5 w-64" />
+        </div>
+        <Skeleton variant="rectangular" className="h-10 w-36" />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <Skeleton variant="rectangular" className="h-10 flex-1 min-w-[200px]" />
+        <Skeleton variant="rectangular" className="h-10 w-32" />
+      </div>
+
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <PurchaseCardSkeleton key={i} />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export default function PurchasesPage() {
+  const { t } = useLanguage();
+  return (
+    <Suspense fallback={<PurchasesSkeleton t={t} />}>
       <PurchasesContent />
     </Suspense>
   );

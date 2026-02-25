@@ -412,16 +412,47 @@ function DashboardSkeleton({ t }: { t: any }) {
         <Skeleton variant="rectangular" className="h-10 w-48" />
         <Skeleton variant="rectangular" className="h-4 w-64" />
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+
+      {/* Responsive Stat Cards Skeleton */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {Array.from({ length: 5 }).map((_, i) => (
-          <SkeletonCard key={i} />
+          <div key={i} className="p-6 bg-card rounded-2xl border border-border space-y-3">
+            <div className="flex items-center justify-between">
+              <Skeleton variant="rectangular" className="h-4 w-24" />
+              <Skeleton variant="rectangular" className="h-10 w-10 rounded-xl" />
+            </div>
+            <Skeleton variant="rectangular" className="h-8 w-20" />
+          </div>
         ))}
       </div>
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
-        <Skeleton variant="rectangular" className="lg:col-span-2 h-80 w-full" />
-        <Skeleton variant="rectangular" className="h-80 w-full" />
+
+      {/* Charts Skeleton */}
+      <div className="grid gap-4 grid-cols-1 xl:grid-cols-3">
+        <Card className="xl:col-span-2">
+          <CardHeader><Skeleton variant="rectangular" className="h-6 w-48" /></CardHeader>
+          <CardContent><Skeleton variant="rectangular" className="h-72 w-full" /></CardContent>
+        </Card>
+        <Card>
+          <CardHeader><Skeleton variant="rectangular" className="h-6 w-32" /></CardHeader>
+          <CardContent><Skeleton variant="rectangular" className="h-72 w-full" /></CardContent>
+        </Card>
       </div>
-      <Skeleton variant="rectangular" className="h-80 w-full" />
+
+      <Card>
+        <CardHeader><Skeleton variant="rectangular" className="h-6 w-64" /></CardHeader>
+        <CardContent><Skeleton variant="rectangular" className="h-72 w-full" /></CardContent>
+      </Card>
+
+      <div className="grid gap-4 grid-cols-1 xl:grid-cols-2">
+        <Card>
+          <CardHeader><Skeleton variant="rectangular" className="h-6 w-56" /></CardHeader>
+          <CardContent><Skeleton variant="rectangular" className="h-80 w-full" /></CardContent>
+        </Card>
+        <Card>
+          <CardHeader><Skeleton variant="rectangular" className="h-6 w-56" /></CardHeader>
+          <CardContent><Skeleton variant="rectangular" className="h-80 w-full" /></CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
