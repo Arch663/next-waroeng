@@ -1,10 +1,10 @@
 // @ts-nocheck
-import { Router, Request, Response } from 'express';
-import { Transaction } from '../models/Transaction';
-import { Purchase } from '../models/Purchase';
-import { Product } from '../models/Product';
-import { History } from '../models/History';
-import { protect } from '../middleware/auth';
+import { Router, Request, Response } from "express";
+import { Transaction } from "../models/Transaction";
+import { Purchase } from "../models/Purchase";
+import { Product } from "../models/Product";
+import { History } from "../models/History";
+import { protect } from "../middleware/auth";
 
 const router = Router();
 
@@ -17,7 +17,7 @@ const buildDateRangeFilter = (startDate?: string, endDate?: string) => {
 };
 
 // GET /api/reports/dashboard - Get dashboard statistics
-router.get('/dashboard', protect, async (req, res) => {
+router.get("/dashboard", protect, async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -29,14 +29,19 @@ router.get('/dashboard', protect, async (req, res) => {
     const totalProducts = await Product.countDocuments();
 
     // Low stock products (stock < 10)
-    const lowStockProducts = await Product.countDocuments({ stock: { $lt: 10 } });
+    const lowStockProducts = await Product.countDocuments({
+      stock: { $lt: 10 },
+    });
 
     // Today's transactions
     const todayTransactions = await Transaction.find({
       createdAt: { $gte: today, $lt: tomorrow },
     });
 
-    const todayRevenue = todayTransactions.reduce((sum, t) => sum + t.totalAmount, 0);
+    const todayRevenue = todayTransactions.reduce(
+      (sum, t) => sum + t.totalAmount,
+      0,
+    );
     const todaySalesCount = todayTransactions.length;
 
     // This month's transactions
@@ -45,7 +50,10 @@ router.get('/dashboard', protect, async (req, res) => {
       createdAt: { $gte: monthStart },
     });
 
-    const monthRevenue = monthTransactions.reduce((sum, t) => sum + t.totalAmount, 0);
+    const monthRevenue = monthTransactions.reduce(
+      (sum, t) => sum + t.totalAmount,
+      0,
+    );
 
     // Last 7 days sales data for chart
     const last7Days = [];
@@ -60,14 +68,64 @@ router.get('/dashboard', protect, async (req, res) => {
         createdAt: { $gte: date, $lt: nextDate },
       });
 
-      const dayRevenue = dayTransactions.reduce((sum, t) => sum + t.totalAmount, 0);
+      const dayRevenue = dayTransactions.reduce(
+        (sum, t) => sum + t.totalAmount,
+        0,
+      );
 
       last7Days.push({
-        date: date.toISOString().split('T')[0],
+        date: date.toISOString().split("T")[0],
         revenue: dayRevenue,
         sales: dayTransactions.length,
       });
     }
+
+    // Top 5 products by quantity sold (all time)
+    const topProducts = await Transaction.aggregate([
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.productId",
+          productName: { $first: "$items.productName" },
+          totalQty: { $sum: "$items.quantity" },
+          totalRevenue: { $sum: "$items.subtotal" },
+        },
+      },
+      { $sort: { totalQty: -1 } },
+      { $limit: 5 },
+    ]);
+
+    // Category revenue (this month) via product -> category lookup
+    const categoryRevenue = await Transaction.aggregate([
+      { $match: { createdAt: { $gte: monthStart } } },
+      { $unwind: "$items" },
+      {
+        $lookup: {
+          from: "products",
+          localField: "items.productId",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+      { $unwind: { path: "$product", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "product.categoryId",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: { $ifNull: ["$category._id", "unknown"] },
+          categoryName: { $first: { $ifNull: ["$category.name", "Lainnya"] } },
+          revenue: { $sum: "$items.subtotal" },
+        },
+      },
+      { $sort: { revenue: -1 } },
+    ]);
 
     res.json({
       success: true,
@@ -80,33 +138,43 @@ router.get('/dashboard', protect, async (req, res) => {
           monthRevenue,
         },
         last7Days,
+        topProducts,
+        categoryRevenue,
       },
     });
   } catch (error) {
-    console.error('Dashboard report error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error fetching dashboard report' 
+    console.error("Dashboard report error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching dashboard report",
     });
   }
 });
 
 // GET /api/reports/sales - Get sales report with date range
-router.get('/sales', protect, async (req, res) => {
+router.get("/sales", protect, async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
 
     const filter: Record<string, unknown> = {};
-    
-    const createdAt = buildDateRangeFilter(startDate as string | undefined, endDate as string | undefined);
+
+    const createdAt = buildDateRangeFilter(
+      startDate as string | undefined,
+      endDate as string | undefined,
+    );
     if (createdAt) {
       filter.createdAt = createdAt;
     }
 
-    const transactions = await Transaction.find(filter as any).sort({ createdAt: -1 });
+    const transactions = await Transaction.find(filter as any).sort({
+      createdAt: -1,
+    });
 
     const totalSales = transactions.length;
-    const totalRevenue = transactions.reduce((sum, t) => sum + t.totalAmount, 0);
+    const totalRevenue = transactions.reduce(
+      (sum, t) => sum + t.totalAmount,
+      0,
+    );
     const avgTransaction = totalSales > 0 ? totalRevenue / totalSales : 0;
 
     res.json({
@@ -121,27 +189,30 @@ router.get('/sales', protect, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error fetching sales report' 
+    res.status(500).json({
+      success: false,
+      message: "Error fetching sales report",
     });
   }
 });
 
 // GET /api/reports/purchases - Get purchases report with date range
-router.get('/purchases', protect, async (req, res) => {
+router.get("/purchases", protect, async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
 
     const filter: Record<string, unknown> = {};
-    
-    const createdAt = buildDateRangeFilter(startDate as string | undefined, endDate as string | undefined);
+
+    const createdAt = buildDateRangeFilter(
+      startDate as string | undefined,
+      endDate as string | undefined,
+    );
     if (createdAt) {
       filter.createdAt = createdAt;
     }
 
     const purchases = await Purchase.find(filter as any)
-      .populate('supplierId', 'name contact')
+      .populate("supplierId", "name contact")
       .sort({ createdAt: -1 });
 
     const totalPurchases = purchases.length;
@@ -158,15 +229,15 @@ router.get('/purchases', protect, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error fetching purchases report' 
+    res.status(500).json({
+      success: false,
+      message: "Error fetching purchases report",
     });
   }
 });
 
 // GET /api/reports/history - Get stock movement history
-router.get('/history', protect, async (req, res) => {
+router.get("/history", protect, async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
@@ -174,12 +245,12 @@ router.get('/history', protect, async (req, res) => {
     const { productId, type } = req.query;
 
     const filter: Record<string, unknown> = {};
-    
+
     if (productId) {
       filter.productId = productId;
     }
-    
-    if (type && ['sold', 'bought', 'adjusted'].includes(type as string)) {
+
+    if (type && ["sold", "bought", "adjusted"].includes(type as string)) {
       filter.type = type;
     }
 
@@ -204,21 +275,24 @@ router.get('/history', protect, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error fetching history' 
+    res.status(500).json({
+      success: false,
+      message: "Error fetching history",
     });
   }
 });
 
 // GET /api/reports/profit - Get profit analysis
-router.get('/profit', protect, async (req, res) => {
+router.get("/profit", protect, async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
 
     const filter: Record<string, unknown> = {};
-    
-    const createdAt = buildDateRangeFilter(startDate as string | undefined, endDate as string | undefined);
+
+    const createdAt = buildDateRangeFilter(
+      startDate as string | undefined,
+      endDate as string | undefined,
+    );
     if (createdAt) {
       filter.createdAt = createdAt;
     }
@@ -226,10 +300,17 @@ router.get('/profit', protect, async (req, res) => {
     const transactions = await Transaction.find(filter as any);
     const purchases = await Purchase.find(filter as any);
 
-    const totalRevenue = transactions.reduce((sum, t) => sum + t.totalAmount, 0);
-    const totalPurchaseCost = purchases.reduce((sum, p) => sum + p.totalAmount, 0);
+    const totalRevenue = transactions.reduce(
+      (sum, t) => sum + t.totalAmount,
+      0,
+    );
+    const totalPurchaseCost = purchases.reduce(
+      (sum, p) => sum + p.totalAmount,
+      0,
+    );
     const grossProfit = totalRevenue - totalPurchaseCost;
-    const profitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
+    const profitMargin =
+      totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
 
     res.json({
       success: true,
@@ -247,9 +328,9 @@ router.get('/profit', protect, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error fetching profit report' 
+    res.status(500).json({
+      success: false,
+      message: "Error fetching profit report",
     });
   }
 });

@@ -1,12 +1,12 @@
 // @ts-nocheck
-import { Router, Response } from 'express';
-import { body } from 'express-validator';
-import { Purchase } from '../models/Purchase';
-import { Product } from '../models/Product';
-import { Supplier } from '../models/Supplier';
-import { History } from '../models/History';
-import { protect, AuthRequest } from '../middleware/auth';
-import { validateRequest } from '../utils/validator';
+import { Router, Response } from "express";
+import { body } from "express-validator";
+import { Purchase } from "../models/Purchase";
+import { Product } from "../models/Product";
+import { Supplier } from "../models/Supplier";
+import { History } from "../models/History";
+import { protect, AuthRequest } from "../middleware/auth";
+import { validateRequest } from "../utils/validator";
 
 const router = Router();
 
@@ -18,14 +18,22 @@ interface PurchaseItemInput {
 
 // POST /api/purchases - Create purchase (restock)
 router.post(
-  '/',
+  "/",
   protect,
   [
-    body('supplierId').isMongoId().withMessage('Valid supplier ID is required'),
-    body('items').isArray({ min: 1 }).withMessage('At least one item is required'),
-    body('items.*.productId').isMongoId().withMessage('Valid product ID is required'),
-    body('items.*.quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
-    body('items.*.buyPrice').isFloat({ min: 0 }).withMessage('Buy price must be a positive number'),
+    body("supplierId").isMongoId().withMessage("Valid supplier ID is required"),
+    body("items")
+      .isArray({ min: 1 })
+      .withMessage("At least one item is required"),
+    body("items.*.productId")
+      .isMongoId()
+      .withMessage("Valid product ID is required"),
+    body("items.*.quantity")
+      .isInt({ min: 1 })
+      .withMessage("Quantity must be at least 1"),
+    body("items.*.buyPrice")
+      .isFloat({ min: 0 })
+      .withMessage("Buy price must be a positive number"),
   ],
   validateRequest,
   async (req: AuthRequest, res: Response) => {
@@ -38,9 +46,9 @@ router.post(
       // Validate supplier
       const supplier = await Supplier.findById(supplierId);
       if (!supplier) {
-        return res.status(404).json({ 
-          success: false, 
-          message: 'Supplier not found' 
+        return res.status(404).json({
+          success: false,
+          message: "Supplier not found",
         });
       }
 
@@ -50,11 +58,11 @@ router.post(
 
       for (const item of items) {
         const product = await Product.findById(item.productId);
-        
+
         if (!product) {
-          return res.status(404).json({ 
-            success: false, 
-            message: `Product ${item.productId} not found` 
+          return res.status(404).json({
+            success: false,
+            message: `Product ${item.productId} not found`,
           });
         }
 
@@ -89,7 +97,7 @@ router.post(
           await History.create({
             productId: product._id,
             productName: product.name,
-            type: 'bought',
+            type: "bought",
             quantity: item.quantity,
             stockBefore,
             stockAfter: product.stock,
@@ -101,33 +109,40 @@ router.post(
 
       res.status(201).json({
         success: true,
-        message: 'Purchase completed successfully',
+        message: "Purchase completed successfully",
         data: purchase,
       });
     } catch (error) {
-      console.error('Purchase error:', error);
-      res.status(500).json({ 
-        success: false, 
-        message: 'Error processing purchase' 
+      console.error("Purchase error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error processing purchase",
       });
     }
-  }
+  },
 );
 
 // GET /api/purchases - Get all purchases
-router.get('/', protect, async (req, res) => {
+router.get("/", protect, async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
     const skip = (page - 1) * limit;
+    const search = req.query.search as string | undefined;
+    const sort = req.query.sort === "asc" ? 1 : -1;
+
+    const filter: Record<string, unknown> = {};
+    if (search && search.trim()) {
+      filter.supplierName = { $regex: search.trim(), $options: "i" };
+    }
 
     const [purchases, total] = await Promise.all([
-      Purchase.find()
-        .populate('supplierId', 'name contact')
-        .sort({ createdAt: -1 })
+      Purchase.find(filter as any)
+        .populate("supplierId", "name contact")
+        .sort({ createdAt: sort })
         .skip(skip)
         .limit(limit),
-      Purchase.countDocuments(),
+      Purchase.countDocuments(filter as any),
     ]);
 
     res.json({
@@ -143,22 +158,24 @@ router.get('/', protect, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error fetching purchases' 
+    res.status(500).json({
+      success: false,
+      message: "Error fetching purchases",
     });
   }
 });
 
 // GET /api/purchases/:id - Get single purchase
-router.get('/:id', protect, async (req, res) => {
+router.get("/:id", protect, async (req, res) => {
   try {
-    const purchase = await Purchase.findById(req.params.id).populate('supplierId');
+    const purchase = await Purchase.findById(req.params.id).populate(
+      "supplierId",
+    );
 
     if (!purchase) {
       return res.status(404).json({
         success: false,
-        message: 'Purchase not found'
+        message: "Purchase not found",
       });
     }
 
@@ -169,31 +186,31 @@ router.get('/:id', protect, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error fetching purchase'
+      message: "Error fetching purchase",
     });
   }
 });
 
 // DELETE /api/purchases/:id - Delete purchase
-router.delete('/:id', protect, async (req, res) => {
+router.delete("/:id", protect, async (req, res) => {
   try {
     const purchase = await Purchase.findByIdAndDelete(req.params.id);
 
     if (!purchase) {
       return res.status(404).json({
         success: false,
-        message: 'Purchase not found'
+        message: "Purchase not found",
       });
     }
 
     res.json({
       success: true,
-      message: 'Purchase deleted successfully',
+      message: "Purchase deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error deleting purchase'
+      message: "Error deleting purchase",
     });
   }
 });

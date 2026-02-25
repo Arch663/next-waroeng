@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, Suspense } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -17,9 +17,9 @@ interface Category {
   name: string;
 }
 
-export default function CategoriesPage() {
+function CategoriesContent() {
   const { language, t } = useLanguage();
-  const tr = (en: string, id: string) => (language === "id" ? id : en);
+  const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,8 +39,8 @@ export default function CategoriesPage() {
     variant: "info",
   });
 
-  const fetchCategories = async () => {
-    setIsLoading(true);
+  const fetchCategories = useCallback(async (showLoading = false) => {
+    if (showLoading) setIsLoading(true);
     try {
       const res = await categoriesAPI.getAll();
       setCategories(res.data?.data || []);
@@ -54,11 +54,11 @@ export default function CategoriesPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [tr]);
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    fetchCategories(true);
+  }, [fetchCategories]);
 
   const openCreate = () => {
     setEditingCategory(null);
@@ -83,7 +83,7 @@ export default function CategoriesPage() {
       }
       setIsModalOpen(false);
       setName("");
-      await fetchCategories();
+      await fetchCategories(false);
       setAlert({
         open: true,
         title: t.common.success,
@@ -95,9 +95,9 @@ export default function CategoriesPage() {
     } catch (error: unknown) {
       const message =
         typeof error === "object" &&
-        error !== null &&
-        "response" in error &&
-        (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          error !== null &&
+          "response" in error &&
+          (error as { response?: { data?: { message?: string } } }).response?.data?.message
           ? (error as { response?: { data?: { message?: string } } }).response?.data?.message!
           : tr("Failed to save category.", "Gagal menyimpan kategori.");
       setAlert({
@@ -114,7 +114,7 @@ export default function CategoriesPage() {
     try {
       await categoriesAPI.delete(deleteId);
       setDeleteId(null);
-      await fetchCategories();
+      await fetchCategories(false);
       setAlert({
         open: true,
         title: t.common.success,
@@ -124,9 +124,9 @@ export default function CategoriesPage() {
     } catch (error: unknown) {
       const message =
         typeof error === "object" &&
-        error !== null &&
-        "response" in error &&
-        (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          error !== null &&
+          "response" in error &&
+          (error as { response?: { data?: { message?: string } } }).response?.data?.message
           ? (error as { response?: { data?: { message?: string } } }).response?.data?.message!
           : tr("Failed to delete category.", "Gagal menghapus kategori.");
       setAlert({
@@ -138,6 +138,38 @@ export default function CategoriesPage() {
     }
   };
 
+  if (isLoading && categories.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold sm:text-3xl">{tr("Categories", "Kategori")}</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {tr("Manage product categories", "Kelola kategori produk")}
+            </p>
+          </div>
+          <Skeleton variant="rectangular" className="h-10 w-32" />
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tags className="h-5 w-5" />
+              <Skeleton variant="rectangular" className="h-6 w-32" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} variant="rectangular" className="h-14" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -147,7 +179,7 @@ export default function CategoriesPage() {
             {tr("Manage product categories", "Kelola kategori produk")}
           </p>
         </div>
-        <Button onClick={openCreate}>
+        <Button onClick={openCreate} disabled={isLoading}>
           <Plus className="h-4 w-4 mr-2" />
           {tr("Add Category", "Tambah Kategori")}
         </Button>
@@ -161,13 +193,7 @@ export default function CategoriesPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} variant="rectangular" className="h-14" />
-              ))}
-            </div>
-          ) : categories.length === 0 ? (
+          {categories.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground">
               {tr("No categories found.", "Belum ada kategori.")}
             </div>
@@ -180,7 +206,7 @@ export default function CategoriesPage() {
                 >
                   <span className="font-medium">{cat.name}</span>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(cat)}>
+                    <Button variant="outline" size="sm" onClick={() => openEdit(cat)} disabled={isLoading}>
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
@@ -188,6 +214,7 @@ export default function CategoriesPage() {
                       size="sm"
                       className="text-destructive hover:text-destructive"
                       onClick={() => setDeleteId(cat._id)}
+                      disabled={isLoading}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -201,7 +228,7 @@ export default function CategoriesPage() {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => !isLoading && setIsModalOpen(false)}
         title={editingCategory ? tr("Edit Category", "Edit Kategori") : tr("Add Category", "Tambah Kategori")}
         size="sm"
       >
@@ -243,6 +270,39 @@ export default function CategoriesPage() {
         variant={alert.variant}
       />
     </div>
+  );
+}
+
+export default function CategoriesPage() {
+  const { language } = useLanguage();
+  const tr = (en: string, id: string) => (language === "id" ? id : en);
+
+  return (
+    <Suspense fallback={
+      <div className="space-y-6">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <Skeleton variant="rectangular" className="h-10 w-48" />
+            <Skeleton variant="rectangular" className="h-4 w-64 mt-2" />
+          </div>
+          <Skeleton variant="rectangular" className="h-10 w-32" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton variant="rectangular" className="h-6 w-32" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} variant="rectangular" className="h-14" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <CategoriesContent />
+    </Suspense>
   );
 }
 

@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, Suspense, useMemo, useState } from "react";
 import { StatCard } from "@/components/ui/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton, SkeletonCard } from "@/components/ui/Skeleton";
 import { reportsAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useChartTheme } from "@/lib/useChartTheme";
 import { formatCurrency } from "@/lib/utils";
 import {
   Package,
@@ -13,6 +14,7 @@ import {
   DollarSign,
   ShoppingCart,
   TrendingUp,
+  CalendarDays,
 } from "lucide-react";
 import {
   Chart as ChartJS,
@@ -51,19 +53,34 @@ interface DashboardData {
     monthRevenue: number;
   };
   last7Days: { date: string; revenue: number; sales: number }[];
+  topProducts: { _id: string; productName: string; totalQty: number; totalRevenue: number }[];
+  categoryRevenue: { _id: string; categoryName: string; revenue: number }[];
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { t, language } = useLanguage();
-  const tr = (en: string, id: string) => (language === "id" ? id : en);
+  const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const theme = useChartTheme();
+
+  const fetchDashboard = useCallback(async (showLoading = false) => {
+    if (showLoading) setIsLoading(true);
+    try {
+      const response = await reportsAPI.getDashboard();
+      const payload = response.data.data as DashboardData;
+      setData(payload);
+      sessionStorage.setItem("dashboard_cache_v2", JSON.stringify(payload));
+    } catch (error) {
+      console.error("Failed to fetch dashboard:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const cacheKey = "dashboard_cache_v1";
-    const cached = sessionStorage.getItem(cacheKey);
-
-    if (cached) {
+    const cached = sessionStorage.getItem("dashboard_cache_v2");
+    if (cached && !data) {
       try {
         const parsed = JSON.parse(cached) as DashboardData;
         setData(parsed);
@@ -72,35 +89,108 @@ export default function DashboardPage() {
         // ignore invalid cache
       }
     }
+    fetchDashboard(data === null);
+  }, [fetchDashboard, data]);
 
-    const fetchDashboard = async () => {
-      try {
-        const response = await reportsAPI.getDashboard();
-        const payload = response.data.data as DashboardData;
-        setData(payload);
-        sessionStorage.setItem(cacheKey, JSON.stringify(payload));
-      } catch (error) {
-        console.error("Failed to fetch dashboard:", error);
-      } finally {
-        setIsLoading(false);
-      }
+  // Destructure theme colors
+  const { c1, c2, c3, c4, c5, border } = theme;
+
+  // Memoized chart data
+  const chartData = useMemo(() => {
+    if (!data) return null;
+    return {
+      labels: data.last7Days.map((d) =>
+        new Date(d.date).toLocaleDateString("id-ID", { weekday: "short" })
+      ),
+      datasets: [
+        {
+          label: tr("Revenue", "Pendapatan"),
+          data: data.last7Days.map((d) => d.revenue),
+          backgroundColor: c1 + "cc",
+          borderColor: c1,
+          borderWidth: 2,
+          borderRadius: 6,
+        },
+      ],
     };
+  }, [data, tr, c1]);
 
-    fetchDashboard();
-  }, []);
+  const salesLineData = useMemo(() => {
+    if (!data) return null;
+    return {
+      labels: data.last7Days.map((d) =>
+        new Date(d.date).toLocaleDateString("id-ID", { weekday: "short" })
+      ),
+      datasets: [
+        {
+          label: tr("Sales", "Transaksi"),
+          data: data.last7Days.map((d) => d.sales),
+          borderColor: c1,
+          backgroundColor: c4 + "c3",
+          tension: 0.30,
+          fill: false,
+          pointRadius: 4,
+          pointBackgroundColor: c2,
+        },
+      ],
+    };
+  }, [data, tr, c1, c2, c4]);
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold">{t.dashboard.title}</h1>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))}
-        </div>
-        <Skeleton variant="rectangular" className="h-80 w-full" />
-      </div>
-    );
+  const stockHealthData = useMemo(() => {
+    if (!data) return null;
+    return {
+      labels: [tr("Healthy Stock", "Stok Aman"), tr("Low Stock", "Stok Rendah")],
+      datasets: [
+        {
+          data: [
+            Math.max(data.overview.totalProducts - data.overview.lowStockProducts, 0),
+            data.overview.lowStockProducts,
+          ],
+          backgroundColor: [c1 + "cc", c3 + "cc"],
+          borderColor: [c1, c3],
+          borderWidth: 2,
+        },
+      ],
+    };
+  }, [data, tr, c1, c3]);
+
+  const categoryColors = [c1, c2, c3, c4, c5, "#8b5cf6", "#06b6d4", "#f43f5e"];
+  const categoryData = useMemo(() => {
+    if (!data) return null;
+    return {
+      labels: (data.categoryRevenue || []).map((c) => c.categoryName),
+      datasets: [
+        {
+          data: (data.categoryRevenue || []).map((c) => c.revenue),
+          backgroundColor: categoryColors.slice(0, (data.categoryRevenue || []).length).map(c => c + "cc"),
+          borderColor: categoryColors.slice(0, (data.categoryRevenue || []).length),
+          borderWidth: 2,
+        },
+      ],
+    };
+  }, [data, c1, c2, c3, c4, c5]);
+
+  const topProductsData = useMemo(() => {
+    if (!data) return null;
+    return {
+      labels: (data.topProducts || []).map((p) =>
+        p.productName.length > 15 ? p.productName.slice(0, 15) + "..." : p.productName
+      ),
+      datasets: [
+        {
+          label: tr("Qty Sold", "Qty Terjual"),
+          data: (data.topProducts || []).map((p) => p.totalQty),
+          backgroundColor: [c1, c2, c3, c1, c2].map(c => c + "cc"),
+          borderColor: [c1, c2, c3, c1, c2],
+          borderWidth: 2,
+          borderRadius: 6,
+        },
+      ],
+    };
+  }, [data, tr, c1, c2, c3]);
+
+  if (isLoading && !data) {
+    return <DashboardSkeleton t={t} />;
   }
 
   if (!data) {
@@ -113,69 +203,64 @@ export default function DashboardPage() {
     );
   }
 
-  const getCssVar = (name: string, fallback: string) => {
-    if (typeof window === "undefined") return fallback;
-    const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    return value || fallback;
-  };
-
-  const c1 = getCssVar("--chart-1", "#d6452b");
-  const c2 = getCssVar("--chart-2", "#ef7b45");
-  const c3 = getCssVar("--chart-3", "#e18a19");
-  const c4 = getCssVar("--chart-4", "#3f8c4f");
-  const border = getCssVar("--border", "#f0c8bb");
-
-  const chartData = {
-    labels: data.last7Days.map((d) => new Date(d.date).toLocaleDateString("id-ID", { weekday: "short" })),
-    datasets: [
-      {
-        label: "Revenue",
-        data: data.last7Days.map((d) => d.revenue),
-        backgroundColor: c1,
-        borderColor: c2,
-        borderWidth: 1,
-        borderRadius: 6,
-      },
-    ],
-  };
-
-  const salesLineData = {
-    labels: data.last7Days.map((d) => new Date(d.date).toLocaleDateString("id-ID", { weekday: "short" })),
-    datasets: [
-      {
-        label: "Sales",
-        data: data.last7Days.map((d) => d.sales),
-        borderColor: c4,
-        backgroundColor: c2,
-        tension: 0.35,
-        fill: true,
-        pointRadius: 3,
-      },
-    ],
-  };
-
-  const stockHealthData = {
-    labels: [tr("Healthy Stock", "Stok Aman"), tr("Low Stock", "Stok Rendah")],
-    datasets: [
-      {
-        data: [
-          Math.max(data.overview.totalProducts - data.overview.lowStockProducts, 0),
-          data.overview.lowStockProducts,
-        ],
-        backgroundColor: [c4, c3],
-        borderColor: [c4, c3],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const chartOptions = {
+  const chartOptions: any = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) =>
+            ` ${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y)}`,
+        },
+      },
+    },
     scales: {
-      y: { beginAtZero: true, grid: { color: border } },
-      x: { grid: { display: false } },
+      y: {
+        beginAtZero: true,
+        grid: { color: border + "66" },
+        ticks: { color: theme.textColor },
+      },
+      x: {
+        grid: { display: false },
+        ticks: { color: theme.textColor },
+      },
+    },
+  };
+
+  const donutOptions: any = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "bottom" as const,
+        labels: { color: theme.textColor, padding: 12, font: { size: 12 } },
+      },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) => ` ${formatCurrency(ctx.parsed)}`,
+        },
+      },
+    },
+  };
+
+  const topProductsOptions: any = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: "y" as const,
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        grid: { color: border + "66" },
+        ticks: { color: theme.textColor, precision: 0 },
+      },
+      y: {
+        grid: { display: false },
+        ticks: { color: theme.textColor },
+      },
     },
   };
 
@@ -188,15 +273,42 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title={tr("Total Products", "Total Produk")} value={data.overview.totalProducts} icon={<Package className="h-6 w-6" />} variant="default" />
-        <StatCard title={t.dashboard.lowStock} value={data.overview.lowStockProducts} icon={<AlertTriangle className="h-6 w-6" />} variant="default" />
-        <StatCard title={tr("Today's Revenue", "Pendapatan Hari Ini")} value={formatCurrency(data.overview.todayRevenue)} icon={<DollarSign className="h-6 w-6" />} variant="default" />
-        <StatCard title={tr("Today's Sales", "Penjualan Hari Ini")} value={data.overview.todaySalesCount} icon={<ShoppingCart className="h-6 w-6" />} variant="default" />
+      {/* Stat Cards - Responsive Grid */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <StatCard
+          title={tr("Total Products", "Total Produk")}
+          value={data.overview.totalProducts}
+          icon={<Package className="h-6 w-6" />}
+          variant="default"
+        />
+        <StatCard
+          title={t.dashboard.lowStock}
+          value={data.overview.lowStockProducts}
+          icon={<AlertTriangle className="h-6 w-6" />}
+          variant="default"
+        />
+        <StatCard
+          title={tr("Today's Revenue", "Pendapatan Hari Ini")}
+          value={formatCurrency(data.overview.todayRevenue)}
+          icon={<DollarSign className="h-6 w-6" />}
+          variant="default"
+        />
+        <StatCard
+          title={tr("Today's Sales", "Penjualan Hari Ini")}
+          value={data.overview.todaySalesCount}
+          icon={<ShoppingCart className="h-6 w-6" />}
+          variant="default"
+        />
+        <StatCard
+          title={tr("Monthly Revenue", "Pendapatan Bulanan")}
+          value={formatCurrency(data.overview.monthRevenue)}
+          icon={<CalendarDays className="h-6 w-6" />}
+          variant="default"
+        />
       </div>
 
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <div className="grid gap-4 grid-cols-1 xl:grid-cols-3">
+        <Card className="xl:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
@@ -205,7 +317,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="h-72 sm:h-80">
-              <Bar data={chartData} options={chartOptions} />
+              {chartData && (<Bar data={chartData} options={chartOptions} />)}
             </div>
           </CardContent>
         </Card>
@@ -215,7 +327,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="h-72 sm:h-80">
-              <Doughnut data={stockHealthData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" as const } } }} />
+              {stockHealthData && (<Doughnut data={stockHealthData} options={donutOptions} />)}
             </div>
           </CardContent>
         </Card>
@@ -227,40 +339,98 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="h-72 sm:h-80">
-            <Line
-              data={salesLineData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                  y: { beginAtZero: true, ticks: { precision: 0 } },
-                  x: { grid: { display: false } },
-                },
-              }}
-            />
+            {salesLineData && (
+              <Line
+                data={salesLineData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: { precision: 0, color: theme.textColor },
+                      grid: { color: border + "66" },
+                    },
+                    x: {
+                      grid: { display: false },
+                      ticks: { color: theme.textColor },
+                    },
+                  },
+                }}
+              />
+            )}
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{tr("Monthly Summary", "Ringkasan Bulanan")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">{tr("Monthly Revenue", "Pendapatan Bulanan")}</p>
-              <p className="text-2xl font-bold text-primary mt-1">{formatCurrency(data.overview.monthRevenue)}</p>
+      <div className="grid gap-4 grid-cols-1 xl:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {tr("Revenue by Category (This Month)", "Pendapatan per Kategori (Bulan Ini)")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              {(data.categoryRevenue || []).length === 0 ? (
+                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                  {tr("No data yet", "Belum ada data")}
+                </div>
+              ) : (
+                categoryData && (<Doughnut data={categoryData} options={donutOptions} />)
+              )}
             </div>
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">{tr("Daily Average", "Rata-rata Harian")}</p>
-              <p className="text-2xl font-bold mt-1">{formatCurrency(data.overview.monthRevenue / 30)}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{tr("Top 5 Products by Sales", "5 Produk Terlaris")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              {(data.topProducts || []).length === 0 ? (
+                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                  {tr("No data yet", "Belum ada data")}
+                </div>
+              ) : (
+                topProductsData && (<Bar data={topProductsData} options={topProductsOptions} />)
+              )}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
 
+function DashboardSkeleton({ t }: { t: any }) {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-2">
+        <Skeleton variant="rectangular" className="h-10 w-48" />
+        <Skeleton variant="rectangular" className="h-4 w-64" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
+        <Skeleton variant="rectangular" className="lg:col-span-2 h-80 w-full" />
+        <Skeleton variant="rectangular" className="h-80 w-full" />
+      </div>
+      <Skeleton variant="rectangular" className="h-80 w-full" />
+    </div>
+  );
+}
+
+export default function DashboardPage() {
+  const { t } = useLanguage();
+  return (
+    <Suspense fallback={<DashboardSkeleton t={t} />}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
