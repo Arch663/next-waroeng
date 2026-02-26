@@ -126,28 +126,28 @@ function CategoriesContent() {
 
   if (isLoading && (!categories || categories.length === 0)) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold sm:text-3xl">{tr("Categories", "Kategori")}</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{tr("Categories", "Kategori")}</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               {tr("Manage product categories", "Kelola kategori produk")}
             </p>
           </div>
-          <Skeleton variant="rectangular" className="h-10 w-32" />
+          <Skeleton variant="rectangular" className="h-9 sm:h-10 w-28 sm:w-32 rounded-lg" />
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Tags className="h-5 w-5" />
-              <Skeleton variant="rectangular" className="h-6 w-32" />
+          <CardHeader className="py-3 sm:py-4">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <Tags className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Skeleton variant="rectangular" className="h-5 sm:h-6 w-28 sm:w-32" />
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+          <CardContent className="p-3 sm:p-4">
+            <div className="space-y-2.5 sm:space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} variant="rectangular" className="h-14" />
+                <Skeleton key={i} variant="rectangular" className="h-12 sm:h-14" />
               ))}
             </div>
           </CardContent>
@@ -157,52 +157,53 @@ function CategoriesContent() {
   }
 
   return (
-    <div className={`space-y-6 transition-opacity duration-200 ${isLoading ? 'opacity-60' : 'opacity-100'}`}>
+    <div className={`space-y-4 sm:space-y-6 transition-opacity duration-200 ${isLoading ? 'opacity-60' : 'opacity-100'}`}>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold sm:text-3xl">{tr("Categories", "Kategori")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{tr("Categories", "Kategori")}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             {tr("Manage product categories", "Kelola kategori produk")}
           </p>
         </div>
-        <Button onClick={openCreate} disabled={isLoading}>
+        <Button onClick={openCreate} disabled={isLoading} className="h-9 sm:h-10">
           <Plus className="h-4 w-4 mr-2" />
-          {tr("Add Category", "Tambah Kategori")}
+          <span className="hidden sm:inline">{tr("Add Category", "Tambah Kategori")}</span>
+          <span className="sm:hidden">{tr("Add", "Tambah")}</span>
         </Button>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Tags className="h-5 w-5" />
+        <CardHeader className="py-3 sm:py-4">
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <Tags className="h-4 w-4 sm:h-5 sm:w-5" />
             {tr("Category List", "Daftar Kategori")}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4">
           {!categories || categories.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground">
+            <div className="text-center py-8 sm:py-10 text-muted-foreground">
               {tr("No categories found.", "Belum ada kategori.")}
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2.5 sm:space-y-3">
               {categories.map((cat) => (
                 <div
                   key={cat._id}
-                  className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-4 py-3"
+                  className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-3 sm:px-4 py-2.5 sm:py-3"
                 >
-                  <span className="font-medium">{cat.name}</span>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(cat)} disabled={isLoading}>
-                      <Pencil className="h-4 w-4" />
+                  <span className="font-medium text-sm sm:text-base">{cat.name}</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Button variant="outline" size="sm" onClick={() => openEdit(cat)} disabled={isLoading} className="h-8 w-8 sm:h-9 sm:w-9 p-0">
+                      <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-destructive hover:text-destructive"
+                      className="text-destructive hover:text-destructive h-8 w-8 sm:h-9 sm:w-9 p-0"
                       onClick={() => setDeleteId(cat._id)}
                       disabled={isLoading}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </Button>
                   </div>
                 </div>
@@ -226,10 +227,10 @@ function CategoriesContent() {
             required
           />
           <div className="flex gap-2 pt-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setIsModalOpen(false)}>
+            <Button type="button" variant="outline" className="flex-1 h-9 sm:h-10" onClick={() => setIsModalOpen(false)}>
               {t.common.cancel}
             </Button>
-            <Button type="submit" className="flex-1">
+            <Button type="submit" className="flex-1 h-9 sm:h-10">
               {editingCategory ? t.common.save : t.common.add}
             </Button>
           </div>

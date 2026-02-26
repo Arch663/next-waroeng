@@ -90,17 +90,17 @@ export default function RegisterPage() {
     <div className="min-h-screen flex bg-gradient-to-br from-background via-background to-muted/20">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none" />
-      
+
       {/* Floating Gradient Orbs */}
-      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed top-1/4 left-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-1/4 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Content */}
       <div className="relative w-full max-w-7xl mx-auto flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <div className="w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          
+        <div className="w-full grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
+
           {/* Left: Features Section */}
-          <div className="hidden lg:block space-y-8">
+          <div className="hidden lg:block space-y-6 lg:space-y-8">
             <Link
               href="/login"
               className="inline-flex items-center text-sm font-semibold text-muted-foreground hover:text-primary transition-colors group"
@@ -109,20 +109,20 @@ export default function RegisterPage() {
               {tr("Back to Login", "Kembali ke Login")}
             </Link>
 
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">{tr("Start your journey", "Mulai perjalanan Anda")}</span>
+            <div className="space-y-3 sm:space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-primary/5 border border-primary/10">
+                <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                <span className="text-xs sm:text-sm font-medium text-foreground">{tr("Start your journey", "Mulai perjalanan Anda")}</span>
               </div>
 
-              <h1 className="text-4xl xl:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
                 {tr("Create Your", "Buat")}
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">
                   {tr("Free Account", "Akun Gratis")}
                 </span>
               </h1>
-              <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
+              <p className="text-sm sm:text-lg text-muted-foreground max-w-md leading-relaxed">
                 {tr(
                   "Join thousands of businesses managing their operations smarter.",
                   "Bergabung dengan ribuan bisnis yang mengelola operasi mereka lebih cerdas."
@@ -131,33 +131,33 @@ export default function RegisterPage() {
             </div>
 
             {/* Benefits List */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {[
                 { title: tr("Quick Setup", "Setup Cepat"), desc: tr("Get started in minutes", "Mulai dalam hitungan menit") },
                 { title: tr("Smart Analytics", "Analitik Cerdas"), desc: tr("Track performance easily", "Pantau performa dengan mudah") },
                 { title: tr("24/7 Support", "Dukungan 24/7"), desc: tr("We're here to help", "Kami siap membantu") },
               ].map((item, i) => (
-                <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all duration-300">
-                  <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="h-4 w-4 text-success" />
+                <div key={i} className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-card border border-border hover:border-primary/30 transition-all duration-300">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-success" />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground text-sm">{item.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                    <p className="font-semibold text-foreground text-xs sm:text-sm">{item.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Stats Card */}
-            <div className="grid grid-cols-3 gap-4 mt-8">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-8">
               {[
                 { value: "1000+", label: tr("Businesses", "Bisnis") },
                 { value: "99.9%", label: tr("Uptime", "Uptime") },
                 { value: "24/7", label: tr("Support", "Dukungan") },
               ].map((stat, i) => (
-                <div key={i} className="text-center p-4 rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 border border-primary/10">
-                  <p className="text-2xl font-bold text-primary">{stat.value}</p>
+                <div key={i} className="text-center p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 border border-primary/10">
+                  <p className="text-xl sm:text-2xl font-bold text-primary">{stat.value}</p>
                   <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
                 </div>
               ))}
@@ -168,34 +168,34 @@ export default function RegisterPage() {
           <div className="w-full max-w-md mx-auto">
             <div className="relative">
               {/* Card with glassmorphism effect */}
-              <div className="relative backdrop-blur-xl bg-card/80 border border-border/50 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-primary/5">
+              <div className="relative backdrop-blur-xl bg-card/80 border border-border/50 rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl shadow-primary/5">
                 {/* Header */}
-                <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 mb-4 shadow-lg shadow-primary/20">
-                    <Package className="h-7 w-7 text-primary-foreground" />
+                <div className="text-center mb-5 sm:mb-6">
+                  <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary to-primary/80 mb-3 sm:mb-4 shadow-lg shadow-primary/20">
+                    <Package className="h-6 w-6 sm:h-7 sm:w-7 text-primary-foreground" />
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground mb-2">
                     {tr("Get Started", "Mulai Sekarang")}
                   </h2>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     {tr("Create account to continue", "Buat akun untuk melanjutkan")}
                   </p>
                 </div>
 
                 {/* Error Alert */}
                 {error && (
-                  <div className="mb-6 p-4 bg-destructive/5 border border-destructive/20 rounded-xl animate-shake">
-                    <p className="text-sm text-destructive flex items-center gap-2 font-medium">
-                      <AlertTriangle className="h-4 w-4 shrink-0" />
+                  <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-destructive/5 border border-destructive/20 rounded-xl animate-shake">
+                    <p className="text-xs sm:text-sm text-destructive flex items-center gap-2 font-medium">
+                      <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                       {error}
                     </p>
                   </div>
                 )}
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground ml-1">
+                    <label className="text-xs sm:text-sm font-medium text-foreground ml-1">
                       {tr("Full Name", "Nama Lengkap")}
                     </label>
                     <div className="relative">
@@ -204,14 +204,14 @@ export default function RegisterPage() {
                         value={formData.fullName}
                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         disabled={isLoading}
-                        className="h-12 pl-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all"
+                        className="h-11 sm:h-12 pl-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all text-sm sm:text-base"
                       />
-                      <UserCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <UserCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground ml-1">
+                    <label className="text-xs sm:text-sm font-medium text-foreground ml-1">
                       {t.auth.username}
                     </label>
                     <div className="relative">
@@ -220,15 +220,15 @@ export default function RegisterPage() {
                         value={formData.username}
                         onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                         disabled={isLoading}
-                        className="h-12 pl-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all"
+                        className="h-11 sm:h-12 pl-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all text-sm sm:text-base"
                         required
                       />
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground ml-1">
+                    <label className="text-xs sm:text-sm font-medium text-foreground ml-1">
                       {tr("Email", "Email")}
                     </label>
                     <div className="relative">
@@ -238,14 +238,14 @@ export default function RegisterPage() {
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         disabled={isLoading}
-                        className="h-12 pl-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all"
+                        className="h-11 sm:h-12 pl-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all text-sm sm:text-base"
                       />
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground ml-1">
+                    <label className="text-xs sm:text-sm font-medium text-foreground ml-1">
                       {t.auth.password}
                     </label>
                     <div className="relative">
@@ -255,23 +255,23 @@ export default function RegisterPage() {
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         disabled={isLoading}
-                        className="h-12 pl-11 pr-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all"
+                        className="h-11 sm:h-12 pl-11 pr-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all text-sm sm:text-base"
                         required
                       />
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors outline-none"
                         tabIndex={-1}
                       >
-                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        {showPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
                       </button>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground ml-1">
+                    <label className="text-xs sm:text-sm font-medium text-foreground ml-1">
                       {tr("Confirm Password", "Konfirmasi Password")}
                     </label>
                     <div className="relative">
@@ -281,24 +281,24 @@ export default function RegisterPage() {
                         value={formData.confirmPassword}
                         onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                         disabled={isLoading}
-                        className="h-12 pl-11 pr-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all"
+                        className="h-11 sm:h-12 pl-11 pr-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all text-sm sm:text-base"
                         required
                       />
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors outline-none"
                         tabIndex={-1}
                       >
-                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <Eye className="h-4 w-4 sm:h-5 sm:w-5" />}
                       </button>
                     </div>
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full h-12 text-sm font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all duration-200 bg-gradient-to-r from-primary to-primary/90 mt-2"
+                    className="w-full h-11 sm:h-12 text-sm font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all duration-200 bg-gradient-to-r from-primary to-primary/90 mt-2"
                     size="md"
                     isLoading={isLoading}
                   >
@@ -307,10 +307,10 @@ export default function RegisterPage() {
                 </form>
 
                 {/* Footer */}
-                <div className="mt-6 pt-6 border-t border-border/50 text-center">
-                  <p className="text-sm text-muted-foreground">
+                <div className="mt-5 sm:mt-6 pt-4 sm:pt-6 border-t border-border/50 text-center">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     {tr("Already have an account?", "Sudah punya akun?")}{" "}
-                    <Link href="/login" className="text-primary hover:text-primary/80 font-semibold transition-colors">
+                    <Link href="/login" className="text-sm text-primary hover:text-primary/80 font-semibold transition-colors">
                       {t.auth.signIn}
                     </Link>
                   </p>
@@ -318,8 +318,8 @@ export default function RegisterPage() {
               </div>
 
               {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-2xl pointer-events-none" />
-              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute -top-3 -right-3 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute -bottom-3 -left-3 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-2xl pointer-events-none" />
             </div>
           </div>
         </div>

@@ -46,13 +46,13 @@ export const StatCard: React.FC<StatCardProps> = React.memo(({
   };
 
   return (
-    <div className={cn("rounded-lg border border-border p-5 transition-all duration-150 hover:bg-muted/30", variants[variant], className)}>
+    <div className={cn("rounded-xl border border-border p-4 sm:p-5 transition-all duration-150 hover:bg-muted/30", variants[variant], className)}>
       <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-muted-foreground">
+        <div className="space-y-1 min-w-0">
+          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
             {title}
           </p>
-          <p className="text-2xl font-semibold tracking-tight text-foreground">
+          <p className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground truncate">
             {typeof value === "number" && value > 1000 ? value.toLocaleString() : value}
           </p>
           {trend && (
@@ -63,14 +63,14 @@ export const StatCard: React.FC<StatCardProps> = React.memo(({
               )}>
                 {trend.value >= 0 ? "+" : ""}{trend.value}%
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground hidden sm:inline">
                 {trend.label}
               </span>
             </div>
           )}
         </div>
-        <div className={cn("p-2.5 rounded-lg bg-muted/50", getIconColor())}>
-          {icon || <Package className="h-5 w-5" />}
+        <div className={cn("p-2 sm:p-2.5 rounded-lg bg-muted/50 shrink-0", getIconColor())}>
+          {icon || <Package className="h-4 w-4 sm:h-5 sm:w-5" />}
         </div>
       </div>
     </div>

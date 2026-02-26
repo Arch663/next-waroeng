@@ -73,17 +73,17 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <h3 className="font-semibold text-foreground text-base mb-1 line-clamp-1 tracking-tight">
+      <div className="p-3 sm:p-4">
+        <h3 className="font-semibold text-foreground text-sm sm:text-base mb-1 line-clamp-1 tracking-tight">
           {product.name}
         </h3>
-        <p className="text-xs text-muted-foreground mb-3">
+        <p className="text-xs text-muted-foreground mb-2 sm:mb-3">
           {product.categoryId?.name || (language === "id" ? "Tanpa Kategori" : "Uncategorized")}
         </p>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-lg font-bold text-primary tracking-tight">
+            <p className="text-base sm:text-lg font-bold text-primary tracking-tight">
               {formatCurrency(product.price)}
             </p>
             <p className={cn(

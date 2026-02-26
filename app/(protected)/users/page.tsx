@@ -97,56 +97,57 @@ function UsersContent() {
   }
 
   return (
-    <div className={`space-y-6 transition-all duration-300 ${isRefreshing ? 'opacity-60 grayscale-[0.2]' : 'opacity-100'}`}>
+    <div className={`space-y-4 sm:space-y-6 transition-all duration-300 ${isRefreshing ? 'opacity-60 grayscale-[0.2]' : 'opacity-100'}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
             {tr("Users & Roles", "Pengguna & Role")}
           </h1>
-          <p className="mt-1 text-sm sm:text-base text-muted-foreground">
+          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
             {tr(
               "Manage account access and update user roles",
               "Kelola akses akun dan perbarui role pengguna"
             )}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => fetchUsers(false)} disabled={isRefreshing} className="shadow-sm">
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {tr("Refresh", "Segarkan")}
+        <Button variant="outline" size="sm" onClick={() => fetchUsers(false)} disabled={isRefreshing} className="shadow-sm h-8 sm:h-9 sm:h-10">
+          <RefreshCw className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <span className="hidden sm:inline">{tr("Refresh", "Segarkan")}</span>
+          <span className="sm:hidden">{tr("Refresh", "Segarkan")}</span>
         </Button>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
+        <CardHeader className="py-3 sm:py-4">
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             {tr("User List", "Daftar Pengguna")}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-4">
           {error && (
-            <div className="mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive font-medium">
+            <div className="mb-3 sm:mb-4 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs sm:text-sm text-destructive font-medium">
               {error}
             </div>
           )}
 
           {items.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-10 text-center italic">{tr("No users found", "Pengguna tidak ditemukan")}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground py-8 sm:py-10 text-center italic">{tr("No users found", "Pengguna tidak ditemukan")}</p>
           ) : (
             <div className="overflow-x-auto rounded-xl border border-border shadow-sm">
-              <table className="w-full">
+              <table className="w-full min-w-[500px]">
                 <thead className="bg-muted/50 border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">
+                    <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">
                       {tr("Username", "Username")}
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">
+                    <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">
                       {tr("Full Name", "Nama Lengkap")}
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">
+                    <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">
                       Role
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">
+                    <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">
                       {tr("Action", "Aksi")}
                     </th>
                   </tr>
@@ -154,21 +155,21 @@ function UsersContent() {
                 <tbody className="divide-y divide-border bg-card">
                   {items.map((item) => (
                     <tr key={item._id} className="hover:bg-muted/20 transition-colors">
-                      <td className="px-4 py-4 text-sm font-medium">{item.username}</td>
-                      <td className="px-4 py-4 text-sm text-muted-foreground">{item.fullName || "-"}</td>
-                      <td className="px-4 py-4 text-sm">
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-xs font-bold capitalize text-primary">
-                          <ShieldCheck className="h-3 w-3" />
+                      <td className="px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium">{item.username}</td>
+                      <td className="px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm text-muted-foreground">{item.fullName || "-"}</td>
+                      <td className="px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-bold capitalize text-primary">
+                          <ShieldCheck className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                           {item.role}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-sm">
-                        <div className="flex items-center gap-2">
+                      <td className="px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
                           <select
                             value={item.role}
                             disabled={!canEditTarget(item) || isSavingId === item._id}
                             onChange={(e) => handleChangeRole(item, e.target.value as UserRole)}
-                            className="rounded-lg border border-input bg-background px-2 py-1.5 text-xs font-medium focus:ring-2 focus:ring-primary shadow-sm disabled:opacity-40"
+                            className="rounded-lg border border-input bg-background px-2 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium focus:ring-2 focus:ring-primary shadow-sm disabled:opacity-40"
                           >
                             {getAllowedRoles(item).map((role) => (
                               <option key={role} value={role}>
@@ -177,7 +178,7 @@ function UsersContent() {
                             ))}
                           </select>
                           {isSavingId === item._id && (
-                            <span className="text-[10px] text-muted-foreground animate-pulse font-mono">
+                            <span className="text-[9px] sm:text-[10px] text-muted-foreground animate-pulse font-mono whitespace-nowrap">
                               SAVING...
                             </span>
                           )}
@@ -197,16 +198,16 @@ function UsersContent() {
 
 function UsersSkeleton({ tr }: { tr: any }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col gap-2">
-        <Skeleton variant="rectangular" className="h-10 w-48" />
-        <Skeleton variant="rectangular" className="h-4 w-64" />
+        <Skeleton variant="rectangular" className="h-8 sm:h-10 w-40 sm:w-48" />
+        <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-56 sm:w-64" />
       </div>
       <Card>
-        <CardHeader><Skeleton variant="rectangular" className="h-6 w-32" /></CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (<Skeleton key={i} variant="rectangular" className="h-12 w-full" />))}
+        <CardHeader className="py-3 sm:py-4"><Skeleton variant="rectangular" className="h-5 sm:h-6 w-28 sm:w-32" /></CardHeader>
+        <CardContent className="p-3 sm:p-4">
+          <div className="space-y-2.5 sm:space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (<Skeleton key={i} variant="rectangular" className="h-10 sm:h-12 w-full" />))}
           </div>
         </CardContent>
       </Card>

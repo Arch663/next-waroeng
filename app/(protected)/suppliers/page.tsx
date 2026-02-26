@@ -187,22 +187,24 @@ function SuppliersContent() {
   }
 
   return (
-    <div className={`space-y-6 transition-all duration-300 ${isRefreshing ? 'opacity-60 blur-[0.5px]' : 'opacity-100'}`}>
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <div className={`space-y-4 sm:space-y-6 transition-all duration-300 ${isRefreshing ? 'opacity-60 blur-[0.5px]' : 'opacity-100'}`}>
+      <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t.suppliers.title}</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{t.suppliers.title}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             {tr("Manage suppliers and create purchases", "Kelola supplier dan buat pembelian")}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setIsPurchaseModalOpen(true)}>
+          <Button variant="outline" onClick={() => setIsPurchaseModalOpen(true)} className="h-9 sm:h-10">
             <Truck className="h-4 w-4 mr-2" />
-            {tr("New Purchase", "Pembelian Baru")}
+            <span className="hidden sm:inline">{tr("New Purchase", "Pembelian Baru")}</span>
+            <span className="sm:hidden">{tr("Purchase", "Beli")}</span>
           </Button>
-          <Button onClick={() => handleOpenSupplierModal()}>
+          <Button onClick={() => handleOpenSupplierModal()} className="h-9 sm:h-10">
             <Plus className="h-4 w-4 mr-2" />
-            {t.suppliers.addSupplier}
+            <span className="hidden sm:inline">{t.suppliers.addSupplier}</span>
+            <span className="sm:hidden">{tr("Add", "Tambah")}</span>
           </Button>
         </div>
       </div>
@@ -214,20 +216,22 @@ function SuppliersContent() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             icon={<Search className="h-4 w-4" />}
+            className="h-9 sm:h-10"
           />
         </div>
-        <Button variant="outline" size="sm" onClick={toggleSort} className="flex items-center gap-2 h-10 px-4">
+        <Button variant="outline" size="sm" onClick={toggleSort} className="flex items-center gap-2 h-9 sm:h-10 px-3 sm:px-4">
           <ArrowUpDown className="h-4 w-4" />
-          {sortOrder === "az" ? "A → Z" : "Z → A"}
+          <span className="hidden sm:inline">{sortOrder === "az" ? "A → Z" : "Z → A"}</span>
+          <span className="sm:hidden">{sortOrder === "az" ? "A↓" : "Z↓"}</span>
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {filteredSuppliers.map((supplier) => (
           <Card key={supplier._id} className="group hover:border-primary/50 transition-colors shadow-sm">
-            <CardContent className="pt-6 space-y-4">
-              <h3 className="font-bold text-lg">{supplier.name}</h3>
-              <div className="text-xs space-y-2 text-muted-foreground">
+            <CardContent className="pt-4 sm:pt-6 space-y-3 sm:space-y-4">
+              <h3 className="font-bold text-base sm:text-lg">{supplier.name}</h3>
+              <div className="text-xs space-y-1.5 sm:space-y-2 text-muted-foreground">
                 <div className="flex items-center gap-2 font-medium">
                   <Phone className="h-3 w-3 text-primary" /> {supplier.contact}
                 </div>
@@ -236,14 +240,14 @@ function SuppliersContent() {
                 </div>
               </div>
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => handleOpenSupplierModal(supplier)}>{t.common.edit}</Button>
-                <Button variant="outline" size="sm" className="flex-1 text-xs text-destructive" onClick={() => setDeleteId(supplier._id)}>{t.common.delete}</Button>
+                <Button variant="outline" size="sm" className="flex-1 text-xs h-8 sm:h-9" onClick={() => handleOpenSupplierModal(supplier)}>{t.common.edit}</Button>
+                <Button variant="outline" size="sm" className="flex-1 text-xs text-destructive h-8 sm:h-9" onClick={() => setDeleteId(supplier._id)}>{t.common.delete}</Button>
               </div>
             </CardContent>
           </Card>
         ))}
         {filteredSuppliers.length === 0 && !isLoading && (
-          <div className="col-span-full py-20 text-center text-muted-foreground italic font-medium">
+          <div className="col-span-full py-16 sm:py-20 text-center text-xs sm:text-sm text-muted-foreground italic font-medium">
             {tr("No suppliers found.", "Supplier tidak ditemukan.")}
           </div>
         )}
@@ -294,14 +298,42 @@ function SuppliersContent() {
 
 function SuppliersSkeleton({ tr }: { tr: any }) {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Skeleton variant="rectangular" className="h-10 w-48" />
-        <div className="flex gap-2"><Skeleton variant="rectangular" className="h-10 w-32" /><Skeleton variant="rectangular" className="h-10 w-32" /></div>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
+        <div className="space-y-2">
+          <Skeleton variant="rectangular" className="h-8 sm:h-10 w-40 sm:w-48" />
+          <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-56 sm:w-64" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton variant="rectangular" className="h-9 sm:h-10 w-28 sm:w-32 rounded-lg" />
+          <Skeleton variant="rectangular" className="h-9 sm:h-10 w-32 sm:w-36 rounded-lg" />
+        </div>
       </div>
-      <Skeleton variant="rectangular" className="h-12 w-full" />
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (<Skeleton key={i} variant="rectangular" className="h-44 w-full" />))}
+
+      {/* Search & Sort Controls */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Skeleton variant="rectangular" className="h-9 sm:h-10 flex-1 min-w-[200px] rounded-lg" />
+        <Skeleton variant="rectangular" className="h-9 sm:h-10 w-24 sm:w-28 rounded-lg" />
+      </div>
+
+      {/* Supplier Cards Grid */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Card key={i}>
+            <CardContent className="pt-4 sm:pt-6 space-y-3 sm:space-y-4">
+              <Skeleton variant="rectangular" className="h-5 sm:h-6 w-32 sm:w-40" />
+              <div className="space-y-2">
+                <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-40 sm:w-48" />
+                <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-48 sm:w-56" />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Skeleton variant="rectangular" className="h-8 w-20 sm:h-9 sm:w-24 rounded-lg" />
+                <Skeleton variant="rectangular" className="h-8 w-20 sm:h-9 sm:w-24 rounded-lg" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );

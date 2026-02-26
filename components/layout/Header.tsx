@@ -18,18 +18,18 @@ export const Header: React.FC = () => {
   return (
     <header
       className={cn(
-        "sticky top-0 z-20 h-16 bg-card border-b border-border",
-        "flex items-center justify-between px-4",
+        "sticky top-0 z-20 h-14 sm:h-16 bg-card border-b border-border",
+        "flex items-center justify-between px-3 sm:px-4",
         "transition-all duration-200 ease-in-out"
       )}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {/* Hamburger Menu for Mobile */}
         <Button
           variant="ghost"
           size="sm"
           onClick={toggleSidebar}
-          className="h-9 w-9 p-0 rounded-lg lg:hidden"
+          className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-lg lg:hidden"
         >
           <Menu className="h-4 w-4" />
         </Button>
@@ -39,7 +39,7 @@ export const Header: React.FC = () => {
           variant="ghost"
           size="sm"
           onClick={toggleSidebar}
-          className="h-9 w-9 p-0 rounded-lg hidden lg:flex"
+          className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-lg hidden lg:flex"
         >
           {sidebarOpen ? (
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -52,17 +52,17 @@ export const Header: React.FC = () => {
           )}
         </Button>
 
-        <h1 className="text-sm font-semibold text-foreground tracking-tight hidden sm:block">
+        <h1 className="text-xs sm:text-sm font-semibold text-foreground tracking-tight hidden sm:block">
           Waroeng POS
         </h1>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         <Button
           variant="ghost"
           size="sm"
           onClick={toggleTheme}
-          className="h-9 w-9 p-0 rounded-lg"
+          className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-lg"
         >
           {theme === "light" ? (
             <Moon className="h-4 w-4" />
@@ -71,9 +71,9 @@ export const Header: React.FC = () => {
           )}
         </Button>
 
-        <div className="flex items-center gap-2 pl-3 border-l border-border">
-          <div className="w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center">
-            <User className="h-3.5 w-3.5 text-primary" />
+        <div className="flex items-center gap-1.5 sm:gap-2 pl-2 sm:pl-3 border-l border-border">
+          <div className="w-6 h-6 sm:w-7 sm:h-7 bg-primary/10 rounded-full flex items-center justify-center">
+            <User className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary" />
           </div>
           <span className="font-medium text-foreground text-xs hidden sm:inline-block">
             {user?.username || (language === "id" ? "Pengguna" : "User")}

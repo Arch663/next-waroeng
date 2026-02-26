@@ -137,13 +137,13 @@ export const InventoryTable: React.FC<InventoryTableProps> = React.memo(
 
     return (
       <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h2 className="text-lg font-semibold text-foreground tracking-tight">
+        <div className="p-3 sm:p-4 border-b border-border">
+          <div className="flex items-center justify-between gap-3 sm:gap-4 flex-wrap">
+            <h2 className="text-base sm:text-lg font-semibold text-foreground tracking-tight">
               {t.inventory.title} ({totalItems} {language === "id" ? "item" : "items"})
             </h2>
             {!hideSearch && (
-              <div className="w-64">
+              <div className="w-full sm:w-64">
                 <Input
                   placeholder={t.cashier.searchProduct}
                   value={searchTerm}
@@ -157,51 +157,51 @@ export const InventoryTable: React.FC<InventoryTableProps> = React.memo(
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[600px]">
             <thead className="bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-foreground">
+                <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-left text-xs sm:text-sm font-medium text-foreground">
                   <button onClick={() => handleSort("name")} className="flex items-center hover:text-foreground transition-colors">
                     {language === "id" ? "Produk" : "Product"}
                     {renderSortIcon("name")}
                   </button>
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-foreground">
+                <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-left text-xs sm:text-sm font-medium text-foreground">
                   <button onClick={() => handleSort("sku")} className="flex items-center hover:text-foreground transition-colors">
                     SKU
                     {renderSortIcon("sku")}
                   </button>
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-foreground">{t.products.category}</th>
-                <th className="px-4 py-3 text-right text-sm font-medium text-foreground">
+                <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-left text-xs sm:text-sm font-medium text-foreground">{t.products.category}</th>
+                <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-right text-xs sm:text-sm font-medium text-foreground">
                   <button onClick={() => handleSort("price")} className="flex items-center justify-end w-full hover:text-foreground transition-colors">
                     {language === "id" ? "Harga" : "Price"}
                     {renderSortIcon("price")}
                   </button>
                 </th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-foreground">
+                <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-medium text-foreground">
                   <button onClick={() => handleSort("stock")} className="flex items-center justify-center w-full hover:text-foreground transition-colors">
                     {t.products.stock}
                     {renderSortIcon("stock")}
                   </button>
                 </th>
-                {showActions && <th className="px-4 py-3 text-right text-sm font-medium text-foreground">{t.common.actions}</th>}
+                {showActions && <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-right text-xs sm:text-sm font-medium text-foreground">{t.common.actions}</th>}
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-t border-border">
-                    <td className="px-4 py-3"><div className="h-4 bg-muted rounded animate-pulse w-32" /></td>
-                    <td className="px-4 py-3"><div className="h-4 bg-muted rounded animate-pulse w-24" /></td>
-                    <td className="px-4 py-3"><div className="h-4 bg-muted rounded animate-pulse w-20" /></td>
-                    <td className="px-4 py-3"><div className="h-4 bg-muted rounded animate-pulse w-20 ml-auto" /></td>
-                    <td className="px-4 py-3"><div className="h-4 bg-muted rounded animate-pulse w-12 mx-auto" /></td>
+                    <td className="px-3 sm:px-4 py-3"><div className="h-3.5 sm:h-4 bg-muted rounded animate-pulse w-24 sm:w-32" /></td>
+                    <td className="px-3 sm:px-4 py-3"><div className="h-3.5 sm:h-4 bg-muted rounded animate-pulse w-20 sm:w-24" /></td>
+                    <td className="px-3 sm:px-4 py-3"><div className="h-3.5 sm:h-4 bg-muted rounded animate-pulse w-16 sm:w-20" /></td>
+                    <td className="px-3 sm:px-4 py-3"><div className="h-3.5 sm:h-4 bg-muted rounded animate-pulse w-16 sm:w-20 ml-auto" /></td>
+                    <td className="px-3 sm:px-4 py-3"><div className="h-3.5 sm:h-4 bg-muted rounded animate-pulse w-10 sm:w-12 mx-auto" /></td>
                     {showActions && (
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-3">
                         <div className="flex gap-2 justify-end">
-                          <div className="h-8 w-8 bg-muted rounded animate-pulse" />
-                          <div className="h-8 w-8 bg-muted rounded animate-pulse" />
+                          <div className="h-7 w-7 sm:h-8 sm:w-8 bg-muted rounded animate-pulse" />
+                          <div className="h-7 w-7 sm:h-8 sm:w-8 bg-muted rounded animate-pulse" />
                         </div>
                       </td>
                     )}
@@ -209,33 +209,33 @@ export const InventoryTable: React.FC<InventoryTableProps> = React.memo(
                 ))
               ) : sortedItems.length === 0 ? (
                 <tr>
-                  <td colSpan={showActions ? 6 : 5} className="px-4 py-12 text-center text-muted-foreground">
+                  <td colSpan={showActions ? 6 : 5} className="px-3 sm:px-4 py-10 sm:py-12 text-center text-sm text-muted-foreground">
                     {language === "id" ? "Produk tidak ditemukan" : "No products found"}
                   </td>
                 </tr>
               ) : (
                 sortedItems.map((item) => (
                   <tr key={item._id} className="border-t border-border hover:bg-muted/30">
-                    <td className="px-4 py-3"><span className="font-medium text-foreground">{item.name}</span></td>
-                    <td className="px-4 py-3"><span className="text-muted-foreground">{item.sku || "-"}</span></td>
-                    <td className="px-4 py-3"><span className="text-muted-foreground">{item.categoryId?.name || "-"}</span></td>
-                    <td className="px-4 py-3 text-right"><span className="font-medium text-primary">{formatCurrency(item.price)}</span></td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={cn("px-2 py-1 rounded-full text-xs font-medium", item.stock === 0 ? "bg-destructive/10 text-destructive" : item.stock < 10 ? "bg-warning/10 text-warning" : "bg-success/10 text-success")}>
+                    <td className="px-3 sm:px-4 py-3"><span className="font-medium text-sm sm:text-base text-foreground">{item.name}</span></td>
+                    <td className="px-3 sm:px-4 py-3"><span className="text-xs sm:text-sm text-muted-foreground">{item.sku || "-"}</span></td>
+                    <td className="px-3 sm:px-4 py-3"><span className="text-xs sm:text-sm text-muted-foreground">{item.categoryId?.name || "-"}</span></td>
+                    <td className="px-3 sm:px-4 py-3 text-right"><span className="font-medium text-sm sm:text-base text-primary">{formatCurrency(item.price)}</span></td>
+                    <td className="px-3 sm:px-4 py-3 text-center">
+                      <span className={cn("px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium", item.stock === 0 ? "bg-destructive/10 text-destructive" : item.stock < 10 ? "bg-warning/10 text-warning" : "bg-success/10 text-success")}>
                         {item.stock}
                       </span>
                     </td>
                     {showActions && (
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2 justify-end">
+                      <td className="px-3 sm:px-4 py-3">
+                        <div className="flex gap-1.5 sm:gap-2 justify-end">
                           {onEdit && (
-                            <Button variant="outline" size="sm" onClick={() => onEdit(item)} className="rounded-xl">
-                              <Pencil className="h-4 w-4" />
+                            <Button variant="outline" size="sm" onClick={() => onEdit(item)} className="rounded-xl h-8 w-8 sm:h-9 sm:w-9 p-0">
+                              <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             </Button>
                           )}
                           {onDelete && (
-                            <Button variant="outline" size="sm" onClick={() => onDelete(item._id)} className="text-destructive hover:text-destructive rounded-xl">
-                              <Trash2 className="h-4 w-4" />
+                            <Button variant="outline" size="sm" onClick={() => onDelete(item._id)} className="text-destructive hover:text-destructive rounded-xl h-8 w-8 sm:h-9 sm:w-9 p-0">
+                              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                             </Button>
                           )}
                         </div>
@@ -249,15 +249,15 @@ export const InventoryTable: React.FC<InventoryTableProps> = React.memo(
         </div>
 
         {totalPages > 1 && (
-          <div className="px-4 py-3 border-t border-border flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
+          <div className="px-3 sm:px-4 py-3 border-t border-border flex items-center justify-between gap-3">
+            <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
               {language === "id" ? "Halaman" : "Page"} {page} {language === "id" ? "dari" : "of"} {totalPages}
             </p>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => onPageChange?.(page - 1)} disabled={page === 1}>
+            <div className="flex gap-1.5 sm:gap-2">
+              <Button variant="outline" size="sm" onClick={() => onPageChange?.(page - 1)} disabled={page === 1} className="h-8 sm:h-9 w-8 sm:w-9 p-0">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => onPageChange?.(page + 1)} disabled={page === totalPages}>
+              <Button variant="outline" size="sm" onClick={() => onPageChange?.(page + 1)} disabled={page === totalPages} className="h-8 sm:h-9 w-8 sm:w-9 p-0">
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>

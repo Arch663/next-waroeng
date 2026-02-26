@@ -231,17 +231,18 @@ function PurchasesContent() {
   const hasValidItems = purchaseItems.some((item) => item.productId);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t.purchases.title}</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{t.purchases.title}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             {tr("Track restock purchases from suppliers", "Lacak pembelian restock dari supplier")}
           </p>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
+        <Button onClick={() => setIsCreateModalOpen(true)} className="h-9 sm:h-10">
           <Plus className="h-4 w-4 mr-2" />
-          {tr("New Purchase", "Pembelian Baru")}
+          <span className="hidden sm:inline">{tr("New Purchase", "Pembelian Baru")}</span>
+          <span className="sm:hidden">{tr("New", "Baru")}</span>
         </Button>
       </div>
 
@@ -253,6 +254,7 @@ function PurchasesContent() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             icon={<Search className="h-4 w-4" />}
+            className="h-9 sm:h-10"
           />
         </div>
 
@@ -260,17 +262,19 @@ function PurchasesContent() {
           variant="outline"
           size="sm"
           onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 h-9 sm:h-10"
         >
           {sortOrder === "desc" ? (
             <>
               <ArrowDown className="h-4 w-4" />
-              {tr("Newest First", "Terbaru")}
+              <span className="hidden sm:inline">{tr("Newest First", "Terbaru")}</span>
+              <span className="sm:hidden">↓</span>
             </>
           ) : (
             <>
               <ArrowUp className="h-4 w-4" />
-              {tr("Oldest First", "Terlama")}
+              <span className="hidden sm:inline">{tr("Oldest First", "Terlama")}</span>
+              <span className="sm:hidden">↑</span>
             </>
           )}
         </Button>
@@ -278,41 +282,41 @@ function PurchasesContent() {
 
       {/* Purchases List */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-4 sm:pt-6">
           {isLoading ? (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} variant="rectangular" className="h-24" />
+                <Skeleton key={i} variant="rectangular" className="h-24 sm:h-28" />
               ))}
             </div>
           ) : purchases.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-10 sm:py-12 text-xs sm:text-sm text-muted-foreground">
               {searchTerm
                 ? tr(`No purchases found for "${searchTerm}"`, `Pembelian "${searchTerm}" tidak ditemukan`)
                 : tr("No purchases found. Create your first purchase!", "Belum ada pembelian. Buat pembelian pertama Anda!")}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {purchases.map((purchase) => (
                 <div
                   key={purchase._id}
-                  className="p-4 bg-muted rounded-xl border border-border"
+                  className="p-3 sm:p-4 bg-muted rounded-xl border border-border"
                 >
                   <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                     <div>
-                      <h3 className="font-semibold">
+                      <h3 className="font-semibold text-sm sm:text-base">
                         {purchase.supplierId?.name || purchase.supplierName}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         {formatDate(purchase.createdAt)}
                       </p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4">
                       <div className="text-right">
-                        <p className="text-lg font-bold text-primary">
+                        <p className="text-base sm:text-lg font-bold text-primary">
                           {formatCurrency(purchase.totalAmount)}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           {purchase.items.length} {tr("items", "item")}
                         </p>
                       </div>
@@ -320,17 +324,17 @@ function PurchasesContent() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setDeleteId(purchase._id)}
-                        className="text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive h-8 w-8 sm:h-9 sm:w-9 p-0"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-1.5 sm:space-y-2">
                     {purchase.items.map((item, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between text-sm"
+                        className="flex items-center justify-between text-xs sm:text-sm"
                       >
                         <span className="text-muted-foreground">
                           {item.productName} × {item.quantity}
@@ -529,23 +533,23 @@ function PurchasesContent() {
 
 function PurchaseCardSkeleton() {
   return (
-    <div className="p-4 bg-muted rounded-xl border border-border space-y-3">
-      <div className="flex items-center justify-between">
+    <div className="p-3 sm:p-4 bg-muted rounded-xl border border-border space-y-2.5 sm:space-y-3">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="space-y-2">
-          <Skeleton variant="rectangular" className="h-5 w-32" />
-          <Skeleton variant="rectangular" className="h-4 w-24" />
+          <Skeleton variant="rectangular" className="h-5 sm:h-6 w-32 sm:w-40" />
+          <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-24 sm:w-28" />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <div className="text-right space-y-1">
-            <Skeleton variant="rectangular" className="h-6 w-24" />
-            <Skeleton variant="rectangular" className="h-4 w-12 ml-auto" />
+            <Skeleton variant="rectangular" className="h-5 sm:h-6 w-20 sm:w-24 ml-auto" />
+            <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-12 sm:w-16 ml-auto" />
           </div>
-          <Skeleton variant="rectangular" className="h-8 w-8" />
+          <Skeleton variant="rectangular" className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg" />
         </div>
       </div>
-      <div className="space-y-2">
-        <Skeleton variant="rectangular" className="h-4 w-full" />
-        <Skeleton variant="rectangular" className="h-4 w-full" />
+      <div className="space-y-1.5 sm:space-y-2">
+        <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-full" />
+        <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-3/4" />
       </div>
     </div>
   );
@@ -553,23 +557,26 @@ function PurchaseCardSkeleton() {
 
 function PurchasesSkeleton({ t }: { t: any }) {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
         <div className="space-y-2">
-          <Skeleton variant="rectangular" className="h-10 w-48" />
-          <Skeleton variant="rectangular" className="h-5 w-64" />
+          <Skeleton variant="rectangular" className="h-8 sm:h-10 w-40 sm:w-48" />
+          <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-56 sm:w-64" />
         </div>
-        <Skeleton variant="rectangular" className="h-10 w-36" />
+        <Skeleton variant="rectangular" className="h-9 sm:h-10 w-32 sm:w-36 rounded-lg" />
       </div>
 
+      {/* Search & Sort Controls */}
       <div className="flex flex-wrap items-center gap-3">
-        <Skeleton variant="rectangular" className="h-10 flex-1 min-w-[200px]" />
-        <Skeleton variant="rectangular" className="h-10 w-32" />
+        <Skeleton variant="rectangular" className="h-9 sm:h-10 flex-1 min-w-[200px] rounded-lg" />
+        <Skeleton variant="rectangular" className="h-9 sm:h-10 w-28 sm:w-32 rounded-lg" />
       </div>
 
+      {/* Purchases List */}
       <Card>
-        <CardContent className="pt-6">
-          <div className="space-y-4">
+        <CardContent className="pt-4 sm:pt-6">
+          <div className="space-y-3 sm:space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
               <PurchaseCardSkeleton key={i} />
             ))}

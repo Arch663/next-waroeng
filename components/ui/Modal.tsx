@@ -47,7 +47,7 @@ export const Modal: React.FC<ModalProps> = ({
   if (!mounted || !isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 transition-opacity"
@@ -57,23 +57,23 @@ export const Modal: React.FC<ModalProps> = ({
       {/* Modal */}
       <div
         className={cn(
-          "relative z-50 w-full mx-4 bg-card rounded-lg shadow-lg border border-border",
+          "relative z-50 w-full bg-card rounded-xl shadow-lg border border-border",
           "animate-in fade-in zoom-in duration-150",
           sizes[size]
         )}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border">
             {title && (
-              <h2 className="text-base font-semibold text-foreground tracking-tight">{title}</h2>
+              <h2 className="text-sm sm:text-base font-semibold text-foreground tracking-tight">{title}</h2>
             )}
             {showCloseButton && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onClose}
-                className="ml-auto -mr-2 rounded-lg"
+                className="ml-auto -mr-2 h-8 w-8 p-0 rounded-lg"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -82,7 +82,7 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Content */}
-        <div className="px-5 py-4">{children}</div>
+        <div className="px-4 sm:px-5 py-3 sm:py-4">{children}</div>
       </div>
     </div>,
     document.body

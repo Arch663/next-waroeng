@@ -62,7 +62,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   if (!mounted || !isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 transition-opacity"
@@ -72,31 +72,31 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       {/* Modal */}
       <div
         className={cn(
-          "relative z-50 w-full max-w-md bg-card rounded-lg shadow-lg border border-border",
+          "relative z-50 w-full max-w-sm sm:max-w-md bg-card rounded-xl shadow-lg border border-border",
           "animate-in fade-in zoom-in duration-150"
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h2 className="text-base font-semibold text-foreground tracking-tight">{title}</h2>
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-border">
+          <h2 className="text-sm sm:text-base font-semibold text-foreground tracking-tight">{title}</h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-8 w-8 p-0 rounded-lg"
+            className="h-8 w-8 p-0 rounded-lg shrink-0"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
 
         {/* Content */}
-        <div className="px-5 py-5">
-          <div className="flex items-start gap-4">
-            <div className={cn("p-2.5 rounded-full", variants[variant].iconBg)}>
-              <AlertTriangle className={cn("h-5 w-5", variants[variant].iconColor)} />
+        <div className="px-4 sm:px-5 py-4 sm:py-5">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className={cn("p-2 sm:p-2.5 rounded-full shrink-0", variants[variant].iconBg)}>
+              <AlertTriangle className={cn("h-4 w-4 sm:h-5 sm:w-5", variants[variant].iconColor)} />
             </div>
-            <div className="flex-1">
-              <p className="text-sm text-foreground">{message}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-foreground break-words">{message}</p>
             </div>
           </div>
 
@@ -104,7 +104,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           <div className="flex gap-2 mt-5">
             <Button
               variant="outline"
-              className="flex-1 rounded-lg"
+              className="flex-1 rounded-lg h-10"
               onClick={onClose}
               disabled={isLoading}
             >
@@ -112,7 +112,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             </Button>
             <Button
               variant={variant === "danger" ? "destructive" : variant === "warning" ? "primary" : "primary"}
-              className="flex-1 rounded-lg"
+              className="flex-1 rounded-lg h-10"
               onClick={onConfirm}
               isLoading={isLoading}
             >
