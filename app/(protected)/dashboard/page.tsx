@@ -180,7 +180,7 @@ function DashboardContent() {
   }, [data, tr, c1, c2, c3]);
 
   if (isLoading && !data) {
-    return <DashboardSkeleton t={t} />;
+    return <DashboardSkeleton />;
   }
 
   if (!data) {
@@ -401,52 +401,53 @@ function DashboardContent() {
   );
 }
 
-function DashboardSkeleton({ t }: { t: any }) {
+function DashboardSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <Skeleton variant="rectangular" className="h-10 w-48" />
-        <Skeleton variant="rectangular" className="h-4 w-64" />
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-1 sm:gap-2">
+        <Skeleton variant="rectangular" className="h-8 sm:h-10 w-40 sm:w-48" />
+        <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-56 sm:w-64" />
       </div>
 
       {/* Responsive Stat Cards Skeleton */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="p-6 bg-card rounded-2xl border border-border space-y-3">
+          <div key={i} className="p-4 sm:p-6 bg-card rounded-2xl border border-border space-y-2 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <Skeleton variant="rectangular" className="h-4 w-24" />
-              <Skeleton variant="rectangular" className="h-10 w-10 rounded-xl" />
+              <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-20 sm:w-24" />
+              <Skeleton variant="rectangular" className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl" />
             </div>
-            <Skeleton variant="rectangular" className="h-8 w-20" />
+            <Skeleton variant="rectangular" className="h-6 sm:h-8 w-16 sm:w-20" />
           </div>
         ))}
       </div>
 
       {/* Charts Skeleton */}
-      <div className="grid gap-4 grid-cols-1 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
-          <CardHeader><Skeleton variant="rectangular" className="h-6 w-48" /></CardHeader>
-          <CardContent><Skeleton variant="rectangular" className="h-72 w-full" /></CardContent>
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader className="py-3 sm:py-4"><Skeleton variant="rectangular" className="h-5 sm:h-6 w-40 sm:w-48" /></CardHeader>
+          <CardContent className="p-3 sm:p-4"><Skeleton variant="rectangular" className="h-56 sm:h-64 lg:h-72 w-full" /></CardContent>
         </Card>
         <Card>
-          <CardHeader><Skeleton variant="rectangular" className="h-6 w-32" /></CardHeader>
-          <CardContent><Skeleton variant="rectangular" className="h-72 w-full" /></CardContent>
+          <CardHeader className="py-3 sm:py-4"><Skeleton variant="rectangular" className="h-5 sm:h-6 w-28 sm:w-32" /></CardHeader>
+          <CardContent className="p-3 sm:p-4"><Skeleton variant="rectangular" className="h-56 sm:h-64 lg:h-72 w-full" /></CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader><Skeleton variant="rectangular" className="h-6 w-64" /></CardHeader>
-        <CardContent><Skeleton variant="rectangular" className="h-72 w-full" /></CardContent>
+        <CardHeader className="py-3 sm:py-4"><Skeleton variant="rectangular" className="h-5 sm:h-6 w-56 sm:w-64" /></CardHeader>
+        <CardContent className="p-3 sm:p-4"><Skeleton variant="rectangular" className="h-56 sm:h-64 lg:h-72 w-full" /></CardContent>
       </Card>
 
-      <div className="grid gap-4 grid-cols-1 xl:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <Card>
-          <CardHeader><Skeleton variant="rectangular" className="h-6 w-56" /></CardHeader>
-          <CardContent><Skeleton variant="rectangular" className="h-80 w-full" /></CardContent>
+          <CardHeader className="py-3 sm:py-4"><Skeleton variant="rectangular" className="h-5 sm:h-6 w-48 sm:w-56" /></CardHeader>
+          <CardContent className="p-3 sm:p-4"><Skeleton variant="rectangular" className="h-56 sm:h-64 lg:h-72 w-full" /></CardContent>
         </Card>
         <Card>
-          <CardHeader><Skeleton variant="rectangular" className="h-6 w-56" /></CardHeader>
-          <CardContent><Skeleton variant="rectangular" className="h-80 w-full" /></CardContent>
+          <CardHeader className="py-3 sm:py-4"><Skeleton variant="rectangular" className="h-5 sm:h-6 w-48 sm:w-56" /></CardHeader>
+          <CardContent className="p-3 sm:p-4"><Skeleton variant="rectangular" className="h-56 sm:h-64 lg:h-72 w-full" /></CardContent>
         </Card>
       </div>
     </div>
@@ -454,9 +455,8 @@ function DashboardSkeleton({ t }: { t: any }) {
 }
 
 export default function DashboardPage() {
-  const { t } = useLanguage();
   return (
-    <Suspense fallback={<DashboardSkeleton t={t} />}>
+    <Suspense fallback={<DashboardSkeleton />}>
       <DashboardContent />
     </Suspense>
   );

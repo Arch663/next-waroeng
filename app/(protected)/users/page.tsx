@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { usersAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useAuthStore } from "@/lib/store";
+import { usePageData } from "@/lib/usePageData";
 import { Users, ShieldCheck, RefreshCw } from "lucide-react";
 
 type UserRole = "admin" | "manager" | "cashier";
@@ -25,31 +26,17 @@ function UsersContent() {
   const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
   const { user } = useAuthStore();
 
-  const [items, setItems] = useState<UserItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { data: usersData, isLoading, isRefreshing, refetch: fetchUsers } = usePageData<UserItem[]>({
+    key: "users",
+    fetchFn: async () => {
+      const response = await usersAPI.getAll();
+      return response.data?.data || [];
+    },
+  });
+
+  const items = usersData || [];
   const [isSavingId, setIsSavingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const fetchUsers = useCallback(async (showLoading = false) => {
-    if (showLoading) setIsLoading(true);
-    else setIsRefreshing(true);
-    setError(null);
-    try {
-      const response = await usersAPI.getAll();
-      setItems(response.data?.data || []);
-    } catch (err) {
-      console.error("Failed to fetch users:", err);
-      setError(language === "id" ? "Gagal memuat pengguna" : "Failed to load users");
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }, [language]);
-
-  useEffect(() => {
-    fetchUsers(items.length === 0);
-  }, [fetchUsers]);
 
   const canEditTarget = (target: UserItem) => {
     if (!user) return false;
@@ -79,11 +66,7 @@ function UsersContent() {
     setError(null);
     try {
       await usersAPI.updateRole(target._id, nextRole);
-      setItems((prev) =>
-        prev.map((item) =>
-          item._id === target._id ? { ...item, role: nextRole } : item
-        )
-      );
+      fetchUsers(true);
     } catch (err) {
       console.error("Failed to update role:", err);
       setError(tr("Failed to update role", "Gagal memperbarui role"));
@@ -93,14 +76,14 @@ function UsersContent() {
   };
 
   if (isLoading && items.length === 0) {
-    return <UsersSkeleton tr={tr} />;
+    return <UsersSkeleton />;
   }
 
   return (
     <div className={`space-y-4 sm:space-y-6 transition-all duration-300 ${isRefreshing ? 'opacity-60 grayscale-[0.2]' : 'opacity-100'}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">
             {tr("Users & Roles", "Pengguna & Role")}
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
@@ -196,13 +179,15 @@ function UsersContent() {
   );
 }
 
-function UsersSkeleton({ tr }: { tr: any }) {
+function UsersSkeleton() {
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
       <div className="flex flex-col gap-2">
         <Skeleton variant="rectangular" className="h-8 sm:h-10 w-40 sm:w-48" />
         <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-56 sm:w-64" />
       </div>
+      {/* Card */}
       <Card>
         <CardHeader className="py-3 sm:py-4"><Skeleton variant="rectangular" className="h-5 sm:h-6 w-28 sm:w-32" /></CardHeader>
         <CardContent className="p-3 sm:p-4">
@@ -216,10 +201,8 @@ function UsersSkeleton({ tr }: { tr: any }) {
 }
 
 export default function UsersPage() {
-  const { language } = useLanguage();
-  const tr = (en: string, id: string) => (language === "id" ? id : en);
   return (
-    <Suspense fallback={<UsersSkeleton tr={tr} />}>
+    <Suspense fallback={<UsersSkeleton />}>
       <UsersContent />
     </Suspense>
   );

@@ -29,10 +29,12 @@ export default function SettingsPage() {
     localStorage.setItem("theme", nextMode ? "dark" : "light");
   };
 
+  // Settings is a static page - no loading skeleton needed
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 lg:p-6">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{t.settings.title}</h1>
+      {/* Page Header */}
+      <div>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{t.settings.title}</h1>
         <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
           {tr(
             "Manage application appearance and your account preferences",

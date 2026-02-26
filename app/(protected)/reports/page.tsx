@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { reportsAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
+import { usePageData } from "@/lib/usePageData";
 import { useChartTheme } from "@/lib/useChartTheme";
 import { formatCurrency, formatDateShort } from "@/lib/utils";
 import { DollarSign, TrendingUp, ShoppingCart, FileText, Printer } from "lucide-react";
@@ -43,46 +44,37 @@ function ReportsContent() {
   const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
   const theme = useChartTheme();
   const [activeTab, setActiveTab] = useState<"overview" | "sales" | "purchases" | "profit" | "expenses">("overview");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const [dateRange, setDateRange] = useState({
     startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split("T")[0],
     endDate: new Date().toISOString().split("T")[0],
   });
 
-  const [dashboardData, setDashboardData] = useState<any>(null);
-  const [salesData, setSalesData] = useState<any>(null);
-  const [purchasesData, setPurchasesData] = useState<any>(null);
-  const [profitData, setProfitData] = useState<any>(null);
-
-  const { c1, c2, c3, c4, c5, border } = theme;
-
-  const fetchReports = useCallback(async () => {
-    setIsRefreshing(true);
-    try {
+  const { data: reportsData, isLoading, isRefreshing } = usePageData<any>({
+    key: "reports-combined",
+    fetchFn: async () => {
       const [dashboard, sales, purchases, profit] = await Promise.all([
         reportsAPI.getDashboard(),
         reportsAPI.getSales(dateRange),
         reportsAPI.getPurchases(dateRange),
         reportsAPI.getProfit(dateRange),
       ]);
-      setDashboardData(dashboard.data.data);
-      setSalesData(sales.data.data);
-      setPurchasesData(purchases.data.data);
-      setProfitData(profit.data.data);
-    } catch (error) {
-      console.error("Failed to fetch reports:", error);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }, [dateRange]);
+      return {
+        dashboard: dashboard.data.data,
+        sales: sales.data.data,
+        purchases: purchases.data.data,
+        profit: profit.data.data,
+      };
+    },
+    params: dateRange,
+  });
 
-  useEffect(() => {
-    const isFirstLoad = !dashboardData;
-    if (isFirstLoad) setIsLoading(true);
-    fetchReports();
-  }, [fetchReports]);
+  const dashboardData = reportsData?.dashboard || null;
+  const salesData = reportsData?.sales || null;
+  const purchasesData = reportsData?.purchases || null;
+  const profitData = reportsData?.profit || null;
+
+  const { c1, c2, c3, c4, c5, border } = theme;
 
   // Handle Export PDF
   const handlePrint = useCallback(async () => {
@@ -262,16 +254,18 @@ function ReportsContent() {
   };
 
   if (isLoading && !dashboardData) {
-    return <ReportsSkeleton tr={tr} />;
+    return <ReportsSkeleton />;
   }
 
   return (
-    <div className={`space-y-4 sm:space-y-6 transition-all duration-300 ${isRefreshing ? 'opacity-60 blur-[1px]' : 'opacity-100 blur-0'}`}>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header - Never blurs during refresh */}
       <div className="flex flex-col gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{t.reports.title}</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{t.reports.title}</h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">{tr("Financial and performance analytics", "Analitik keuangan dan performa")}</p>
         </div>
+        {/* Date Range & Export - Never blurs */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-1.5 sm:gap-2">
             <span className="text-xs text-muted-foreground font-medium hidden sm:inline">{tr("From", "Dari")}:</span>
@@ -289,6 +283,7 @@ function ReportsContent() {
         </div>
       </div>
 
+      {/* Tabs - Never blurs */}
       <div className="flex gap-1.5 sm:gap-2 border-b border-border bg-card/50 p-1 rounded-t-xl overflow-x-auto">
         {[
           { id: "overview", label: tr("Overview", "Ringkasan") },
@@ -308,7 +303,8 @@ function ReportsContent() {
         ))}
       </div>
 
-      <div className="space-y-6">
+      {/* Content - Blurs during refresh */}
+      <div className={`space-y-6 transition-opacity duration-300 ${isRefreshing ? 'opacity-60 blur-[1px]' : 'opacity-100'}`}>
         {activeTab === "overview" && renderOverview()}
         {activeTab === "sales" && renderSales()}
         {activeTab === "purchases" && (
@@ -342,9 +338,10 @@ function ReportsContent() {
   );
 }
 
-function ReportsSkeleton({ tr }: { tr: any }) {
+function ReportsSkeleton() {
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
       <div className="flex flex-col gap-3 sm:gap-4">
         <div className="space-y-2">
           <Skeleton variant="rectangular" className="h-8 sm:h-10 w-40 sm:w-48" />
@@ -357,12 +354,14 @@ function ReportsSkeleton({ tr }: { tr: any }) {
         </div>
       </div>
 
+      {/* Tabs */}
       <div className="flex gap-1.5 sm:gap-2 border-b border-border p-1">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} variant="rectangular" className="h-8 sm:h-9 w-20 sm:w-24 rounded-lg" />
         ))}
       </div>
 
+      {/* Overview Stats & Charts */}
       <div className="space-y-4 sm:space-y-6">
         <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -389,10 +388,8 @@ function ReportsSkeleton({ tr }: { tr: any }) {
 }
 
 export default function ReportsPage() {
-  const { language } = useLanguage();
-  const tr = (en: string, id: string) => (language === "id" ? id : en);
   return (
-    <Suspense fallback={<ReportsSkeleton tr={tr} />}>
+    <Suspense fallback={<ReportsSkeleton />}>
       <ReportsContent />
     </Suspense>
   );

@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { AlertModal } from "@/components/ui/AlertModal";
 import { suppliersAPI, purchasesAPI, productsAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
+import { usePageData } from "@/lib/usePageData";
 import { formatCurrency } from "@/lib/utils";
 import { Plus, ArrowUpDown, Search, Phone, MapPin, Truck } from "lucide-react";
 
@@ -37,10 +38,25 @@ function SuppliersContent() {
   const { t, language } = useLanguage();
   const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
 
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { data: suppliersData, isLoading: isLoadingSuppliers, isRefreshing: isRefreshingSuppliers, refetch: refetchSuppliers } = usePageData<Supplier[]>({
+    key: "suppliers",
+    fetchFn: async () => {
+      const response = await suppliersAPI.getAll();
+      return response.data.data || [];
+    },
+  });
+
+  const { data: productsData } = usePageData<Product[]>({
+    key: "suppliers-products",
+    fetchFn: async () => {
+      const response = await productsAPI.getAll({ limit: 100 });
+      return response.data.data?.products || response.data.data || [];
+    },
+  });
+
+  const suppliers = suppliersData || [];
+  const products = productsData || [];
+
   const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
@@ -68,39 +84,11 @@ function SuppliersContent() {
     address: "",
   });
 
-  const fetchSuppliers = useCallback(async (showLoading = false) => {
-    if (showLoading) setIsLoading(true);
-    else setIsRefreshing(true);
-    try {
-      const response = await suppliersAPI.getAll();
-      setSuppliers(response.data.data || []);
-    } catch (error) {
-      console.error("Failed to fetch suppliers:", error);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }, []);
-
-  const fetchProducts = useCallback(async () => {
-    try {
-      const response = await productsAPI.getAll({ limit: 100 });
-      setProducts(response.data.data?.products || response.data.data || []);
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchSuppliers(suppliers.length === 0);
-    fetchProducts();
-  }, [fetchSuppliers, fetchProducts]);
-
   const filteredSuppliers = suppliers
-    .filter((s) =>
+    .filter((s: Supplier) =>
       searchTerm ? s.name.toLowerCase().includes(searchTerm.toLowerCase()) : true
     )
-    .sort((a, b) =>
+    .sort((a: Supplier, b: Supplier) =>
       sortOrder === "az"
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name)
@@ -130,7 +118,7 @@ function SuppliersContent() {
         await suppliersAPI.create(supplierForm);
       }
       setIsSupplierModalOpen(false);
-      fetchSuppliers(false);
+      refetchSuppliers(true);
     } catch (error) {
       console.error("Failed to save supplier:", error);
     }
@@ -141,7 +129,7 @@ function SuppliersContent() {
     try {
       await suppliersAPI.delete(deleteId);
       setDeleteId(null);
-      fetchSuppliers(false);
+      refetchSuppliers(true);
     } catch (error) {
       console.error("Failed to delete supplier:", error);
     }
@@ -176,21 +164,24 @@ function SuppliersContent() {
       setIsPurchaseModalOpen(false);
       setPurchaseItems([]);
       setSelectedSupplier("");
-      fetchProducts();
+      // refetchSuppliers(true); // If needed
     } catch (error) {
       console.error("Purchase error:", error);
     }
   };
 
-  if (isLoading && suppliers.length === 0) {
-    return <SuppliersSkeleton tr={tr} />;
+  if (isLoadingSuppliers && !suppliersData) {
+    return <SuppliersSkeleton />;
   }
 
+  const isRefreshing = isRefreshingSuppliers;
+
   return (
-    <div className={`space-y-4 sm:space-y-6 transition-all duration-300 ${isRefreshing ? 'opacity-60 blur-[0.5px]' : 'opacity-100'}`}>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header - Never blurs during refresh */}
       <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{t.suppliers.title}</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{t.suppliers.title}</h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             {tr("Manage suppliers and create purchases", "Kelola supplier dan buat pembelian")}
           </p>
@@ -209,6 +200,7 @@ function SuppliersContent() {
         </div>
       </div>
 
+      {/* Search & Sort Controls - Never blurs */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex-1 min-w-[200px]">
           <Input
@@ -226,8 +218,9 @@ function SuppliersContent() {
         </Button>
       </div>
 
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredSuppliers.map((supplier) => (
+      {/* Supplier Cards - Blurs during refresh */}
+      <div className={`grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 transition-opacity duration-300 ${isRefreshing ? 'opacity-60 blur-[0.5px]' : 'opacity-100'}`}>
+        {filteredSuppliers.map((supplier: Supplier) => (
           <Card key={supplier._id} className="group hover:border-primary/50 transition-colors shadow-sm">
             <CardContent className="pt-4 sm:pt-6 space-y-3 sm:space-y-4">
               <h3 className="font-bold text-base sm:text-lg">{supplier.name}</h3>
@@ -246,7 +239,7 @@ function SuppliersContent() {
             </CardContent>
           </Card>
         ))}
-        {filteredSuppliers.length === 0 && !isLoading && (
+        {filteredSuppliers.length === 0 && !isLoadingSuppliers && (
           <div className="col-span-full py-16 sm:py-20 text-center text-xs sm:text-sm text-muted-foreground italic font-medium">
             {tr("No suppliers found.", "Supplier tidak ditemukan.")}
           </div>
@@ -274,14 +267,14 @@ function SuppliersContent() {
           {/* Select Supplier */}
           <select value={selectedSupplier} onChange={(e) => setSelectedSupplier(e.target.value)} className="w-full px-4 py-2.5 bg-card border border-input rounded-lg">
             <option value="">{t.suppliers.selectSupplier}</option>
-            {suppliers.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
+            {suppliers.map((s: Supplier) => <option key={s._id} value={s._id}>{s.name}</option>)}
           </select>
           <div className="space-y-2">
             {purchaseItems.map((item, idx) => (
               <div key={idx} className="flex gap-2">
                 <select value={item.productId} onChange={(e) => handleUpdatePurchaseItem(idx, 'productId', e.target.value)} className="flex-1 bg-card border border-input rounded p-2 text-sm">
                   <option value="">{tr("Product", "Produk")}</option>
-                  {products.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
+                  {products.map((p: Product) => <option key={p._id} value={p._id}>{p.name}</option>)}
                 </select>
                 <Input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => handleUpdatePurchaseItem(idx, 'quantity', parseInt(e.target.value))} className="w-20" />
                 <Input type="number" placeholder="Rp" value={item.buyPrice} onChange={(e) => handleUpdatePurchaseItem(idx, 'buyPrice', parseFloat(e.target.value))} className="w-24" />
@@ -296,7 +289,7 @@ function SuppliersContent() {
   );
 }
 
-function SuppliersSkeleton({ tr }: { tr: any }) {
+function SuppliersSkeleton() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
@@ -340,10 +333,8 @@ function SuppliersSkeleton({ tr }: { tr: any }) {
 }
 
 export default function SuppliersPage() {
-  const { language } = useLanguage();
-  const tr = (en: string, id: string) => (language === "id" ? id : en);
   return (
-    <Suspense fallback={<SuppliersSkeleton tr={tr} />}>
+    <Suspense fallback={<SuppliersSkeleton />}>
       <SuppliersContent />
     </Suspense>
   );

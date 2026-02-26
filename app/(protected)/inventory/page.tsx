@@ -136,16 +136,16 @@ function InventoryContent() {
     }
   };
 
-  if (isLoading && products.length === 0) {
+  if (isLoading && !productsData) {
     return <InventorySkeleton tr={tr} t={t} />;
   }
 
   return (
-    <div className={`space-y-6 transition-opacity duration-200 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`}>
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <div className={`space-y-4 sm:space-y-6 transition-opacity duration-200 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`}>
+      <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{t.inventory.title}</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{t.inventory.title}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             {tr("Manage product stock and view history", "Kelola stok produk dan lihat riwayat")}
           </p>
         </div>
@@ -192,7 +192,7 @@ function InventoryContent() {
         items={products}
         onEdit={handleOpenModal}
         onDelete={(id) => setDeleteId(id)}
-        isLoading={isRefreshing && products.length > 0}
+        isLoading={isRefreshing}
         totalItems={totalItems}
         page={page}
         onPageChange={setPage}
@@ -316,52 +316,44 @@ function InventoryContent() {
 
 function InventorySkeleton({ tr, t }: { tr: any; t: any }) {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
         <div className="space-y-2">
-          <Skeleton variant="rectangular" className="h-10 w-64" />
-          <Skeleton variant="rectangular" className="h-4 w-80" />
+          <Skeleton variant="rectangular" className="h-8 sm:h-10 w-40 sm:w-48" />
+          <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-56 sm:w-64" />
         </div>
-        <Skeleton variant="rectangular" className="h-10 w-40" />
+        <Skeleton variant="rectangular" className="h-9 sm:h-10 w-32 sm:w-40 rounded-lg" />
       </div>
 
+      {/* Search & Category Filter */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-4 sm:pt-6">
           <div className="flex items-center gap-3 flex-wrap">
-            <Skeleton variant="rectangular" className="h-11 flex-1 min-w-[260px]" />
-            <Skeleton variant="rectangular" className="h-11 w-full sm:w-48" />
+            <Skeleton variant="rectangular" className="h-9 sm:h-10 flex-1 min-w-[200px] rounded-lg" />
+            <Skeleton variant="rectangular" className="h-9 sm:h-10 w-full sm:w-48 rounded-lg" />
           </div>
         </CardContent>
       </Card>
 
+      {/* Table */}
       <Card>
-        <CardHeader className="py-4 border-b border-border/50">
-          <Skeleton variant="rectangular" className="h-6 w-48" />
+        <CardHeader className="py-3 sm:py-4 border-b border-border/50">
+          <Skeleton variant="rectangular" className="h-5 sm:h-6 w-40 sm:w-48" />
         </CardHeader>
         <CardContent className="p-0">
           <div className="space-y-0">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex items-center justify-between p-4 border-b border-border/50 last:border-0">
+              <div key={i} className="flex items-center justify-between p-3 sm:p-4 border-b border-border/50 last:border-0">
                 <div className="flex-1 space-y-2">
-                  <Skeleton variant="rectangular" className="h-5 w-48" />
-                  <Skeleton variant="rectangular" className="h-3 w-24" />
+                  <Skeleton variant="rectangular" className="h-4 sm:h-5 w-40 sm:w-48" />
+                  <Skeleton variant="rectangular" className="h-3 sm:h-4 w-20 sm:w-24" />
                 </div>
-                <div className="flex gap-4">
-                  <Skeleton variant="rectangular" className="h-8 w-16" />
-                  <Skeleton variant="rectangular" className="h-8 w-16" />
+                <div className="flex gap-3 sm:gap-4">
+                  <Skeleton variant="rectangular" className="h-7 w-14 sm:h-8 sm:w-16 rounded" />
+                  <Skeleton variant="rectangular" className="h-7 w-14 sm:h-8 sm:w-16 rounded" />
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader><Skeleton variant="rectangular" className="h-6 w-56" /></CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} variant="rectangular" className="h-12 w-full" />
             ))}
           </div>
         </CardContent>

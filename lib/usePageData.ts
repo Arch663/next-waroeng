@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { usePageCache } from "./usePageCache";
+import { useNavigationStore } from "./useNavigationStore";
 
 interface UsePageDataOptions<T> {
   key: string;
@@ -24,8 +25,8 @@ interface UsePageDataReturn<T> {
 /**
  * Custom hook for fetching page data with intelligent caching.
  * - Loads from cache immediately on first render
- * - Only shows loading on initial load when no cache exists
- * - Subsequent navigations use cached data without loading
+ * - Only shows loading on initial load when no cache exists AND is first visit
+ * - Subsequent navigations use cached data without full page loading
  * - Background refresh available
  */
 export function usePageData<T>({
@@ -39,65 +40,104 @@ export function usePageData<T>({
   const setCache = usePageCache((state) => state.setCache);
   const invalidateCache = usePageCache((state) => state.invalidateCache);
 
-  const [data, setData] = useState<T | null>(initialData ?? null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const isFirstVisit = useNavigationStore((state) => state.isFirstVisit);
+  const markAsVisited = useNavigationStore((state) => state.markAsVisited);
 
   // Params key for cache differentiation
   const paramsKey = params ? JSON.stringify(params) : undefined;
   const cacheKey = paramsKey ? `${key}:${paramsKey}` : key;
 
-  const fetchData = useCallback(async (forceRefresh = false) => {
-    if (!enabled) return;
+  // Synchronously check cache for immediate data
+  const cachedData = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    return getCache<T>(cacheKey);
+  }, [cacheKey, getCache]);
 
-    // Try to get cached data first
-    const cached = getCache<T>(cacheKey);
-    
-    // If we have cached data and not forcing refresh, use it immediately
-    if (cached && !forceRefresh) {
-      setData(cached);
-      setIsLoading(false);
-      return;
-    }
+  const [data, setData] = useState<T | null>(initialData ?? cachedData ?? null);
 
-    // If we have cached data but forcing refresh, show refreshing state
-    if (cached && forceRefresh) {
-      setIsRefreshing(true);
-    } else {
-      // No cache, show loading
-      setIsLoading(true);
-    }
+  // Decide if we should show initial loading skeleton
+  // Only show if: no data exists AND it's the first time visiting this page in this session
+  const [isLoading, setIsLoading] = useState(() => {
+    if (!enabled) return false;
+    if (initialData || cachedData) return false;
+    return isFirstVisit(key);
+  });
 
-    try {
-      const result = await fetchFn();
-      setData(result);
-      setCache(cacheKey, result, params);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to fetch data"));
-      // If error and we have cached data, keep using it
-      if (!cached) {
-        setData(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchData = useCallback(
+    async (forceRefresh = false) => {
+      if (!enabled) return;
+
+      // Try to get cached data first
+      const cached = getCache<T>(cacheKey);
+
+      // If we have cached data and not forcing refresh, use it immediately
+      if (cached && !forceRefresh) {
+        setData(cached);
+        setIsLoading(false);
+        return;
       }
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }, [cacheKey, fetchFn, getCache, setCache, enabled, params]);
 
-  // Initial load - only load if no cached data exists
+      // Refreshing vs Loading state
+      if (cached || data) {
+        setIsRefreshing(true);
+      } else {
+        // Only set loading if we truly have no data to show
+        setIsLoading(true);
+      }
+
+      try {
+        const result = await fetchFn();
+        setData(result);
+        setCache(cacheKey, result, params);
+        setError(null);
+        // Mark as visited once we've successfully loaded or found data
+        markAsVisited(key);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err : new Error("Failed to fetch data"),
+        );
+        if (!cached && !data) {
+          setData(null);
+        }
+      } finally {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [
+      cacheKey,
+      fetchFn,
+      getCache,
+      setCache,
+      enabled,
+      params,
+      key,
+      markAsVisited,
+      data,
+    ],
+  );
+
+  // Initial load effect
   useEffect(() => {
     if (!enabled) return;
-    
-    const cached = getCache<T>(cacheKey);
-    if (cached) {
-      setData(cached);
-      setIsLoading(false);
+
+    // If we already have data (from initialData or sync cache check),
+    // we still might want to trigger a background refresh or just mark as visited
+    if (data) {
+      markAsVisited(key);
+      // Optional: triggger background refresh even if cached?
+      // For now, let's stick to the current behavior: only fetch if no cache
+      const cached = getCache<T>(cacheKey);
+      if (!cached) {
+        fetchData(false);
+      }
     } else {
       fetchData(false);
     }
-  }, [cacheKey, fetchData, getCache, enabled]);
+  }, [cacheKey, fetchData, enabled, key, markAsVisited, data, getCache]);
 
   const invalidate = useCallback(() => {
     invalidateCache(cacheKey);

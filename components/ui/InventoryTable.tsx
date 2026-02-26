@@ -192,16 +192,16 @@ export const InventoryTable: React.FC<InventoryTableProps> = React.memo(
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-t border-border">
-                    <td className="px-3 sm:px-4 py-3"><div className="h-3.5 sm:h-4 bg-muted rounded animate-pulse w-24 sm:w-32" /></td>
-                    <td className="px-3 sm:px-4 py-3"><div className="h-3.5 sm:h-4 bg-muted rounded animate-pulse w-20 sm:w-24" /></td>
-                    <td className="px-3 sm:px-4 py-3"><div className="h-3.5 sm:h-4 bg-muted rounded animate-pulse w-16 sm:w-20" /></td>
-                    <td className="px-3 sm:px-4 py-3"><div className="h-3.5 sm:h-4 bg-muted rounded animate-pulse w-16 sm:w-20 ml-auto" /></td>
-                    <td className="px-3 sm:px-4 py-3"><div className="h-3.5 sm:h-4 bg-muted rounded animate-pulse w-10 sm:w-12 mx-auto" /></td>
+                    <td className="px-3 sm:px-4 py-3"><div className="h-4 bg-muted animate-pulse w-3/4 rounded" /></td>
+                    <td className="px-3 sm:px-4 py-3"><div className="h-4 bg-muted animate-pulse w-1/2 rounded" /></td>
+                    <td className="px-3 sm:px-4 py-3"><div className="h-4 bg-muted animate-pulse w-2/3 rounded" /></td>
+                    <td className="px-3 sm:px-4 py-3"><div className="h-4 bg-muted animate-pulse w-1/2 rounded ml-auto" /></td>
+                    <td className="px-3 sm:px-4 py-3"><div className="h-6 w-10 bg-muted animate-pulse rounded-full mx-auto" /></td>
                     {showActions && (
                       <td className="px-3 sm:px-4 py-3">
                         <div className="flex gap-2 justify-end">
-                          <div className="h-7 w-7 sm:h-8 sm:w-8 bg-muted rounded animate-pulse" />
-                          <div className="h-7 w-7 sm:h-8 sm:w-8 bg-muted rounded animate-pulse" />
+                          <div className="h-8 w-8 bg-muted animate-pulse rounded-xl" />
+                          <div className="h-8 w-8 bg-muted animate-pulse rounded-xl" />
                         </div>
                       </td>
                     )}
