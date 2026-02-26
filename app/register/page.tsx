@@ -8,7 +8,7 @@ import { authAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Package, Eye, EyeOff, AlertTriangle, User, Mail, Lock, UserCheck, ArrowLeft } from "lucide-react";
+import { Package, Eye, EyeOff, AlertTriangle, User, Mail, Lock, UserCheck, ArrowLeft, Sparkles, CheckCircle2 } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -87,163 +87,241 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* Left Panel: Brand & Visuals (Hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-muted/30 flex-col items-center justify-center p-8 xl:p-12">
-        <div className="relative z-10 max-w-md text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-primary mb-6 sm:mb-8">
-            <Package className="h-7 w-7 sm:h-8 sm:w-8 text-primary-foreground" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight mb-3 sm:mb-4 text-foreground">
-            {tr("Join Waroeng", "Gabung Waroeng")}
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground font-medium mb-8 sm:mb-10 leading-relaxed">
-            {tr("Empower your business with digital inventory and sales tracking.", "Tingkatkan bisnis Anda dengan pelacakan stok dan penjualan digital.")}
-          </p>
+    <div className="min-h-screen flex bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none" />
+      
+      {/* Floating Gradient Orbs */}
+      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="space-y-2 sm:space-y-3 text-left max-w-xs mx-auto">
-            {[
-              { text: tr("Setup your shop in minutes", "Siapkan toko dalam hitungan menit"), icon: "⚡" },
-              { text: tr("Automated financial summaries", "Ringkasan keuangan otomatis"), icon: "📈" },
-              { text: tr("Cloud-based data backup", "Pencadangan data berbasis cloud"), icon: "☁️" },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border">
-                <span className="text-lg">{item.icon}</span>
-                <span className="text-sm font-medium">{item.text}</span>
+      {/* Main Content */}
+      <div className="relative w-full max-w-7xl mx-auto flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div className="w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          
+          {/* Left: Features Section */}
+          <div className="hidden lg:block space-y-8">
+            <Link
+              href="/login"
+              className="inline-flex items-center text-sm font-semibold text-muted-foreground hover:text-primary transition-colors group"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+              {tr("Back to Login", "Kembali ke Login")}
+            </Link>
+
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">{tr("Start your journey", "Mulai perjalanan Anda")}</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* Right Panel: Register Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12 overflow-y-auto max-h-screen">
-        <div className="w-full max-w-[380px] sm:max-w-[400px] py-8 sm:py-10">
-          <Link
-            href="/login"
-            className="inline-flex items-center text-sm font-semibold text-muted-foreground hover:text-primary transition-colors mb-6 sm:mb-8 group"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            {tr("Back to Login", "Kembali ke Login")}
-          </Link>
-
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
-              {tr("Create Account", "Buat Akun")}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {tr("Start managing your shop today.", "Mulai kelola toko Anda sekarang.")}
-            </p>
-          </div>
-
-          {error && (
-            <div className="mb-6 p-3 bg-destructive/5 border border-destructive/20 rounded-lg animate-shake">
-              <p className="text-sm text-destructive flex items-center gap-2 font-medium">
-                <AlertTriangle className="h-4 w-4 shrink-0" />
-                {error}
+              <h1 className="text-4xl xl:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
+                {tr("Create Your", "Buat")}
+                <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">
+                  {tr("Free Account", "Akun Gratis")}
+                </span>
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
+                {tr(
+                  "Join thousands of businesses managing their operations smarter.",
+                  "Bergabung dengan ribuan bisnis yang mengelola operasi mereka lebih cerdas."
+                )}
               </p>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-            <div className="relative">
-              <Input
-                label={tr("Full Name", "Nama Lengkap")}
-                placeholder={tr("Enter your full name", "Masukkan nama lengkap")}
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                disabled={isLoading}
-                className="h-11 pl-10 rounded-lg"
-              />
-              <UserCheck className="absolute left-3 top-[34px] h-4 w-4 text-muted-foreground" />
+            {/* Benefits List */}
+            <div className="space-y-4">
+              {[
+                { title: tr("Quick Setup", "Setup Cepat"), desc: tr("Get started in minutes", "Mulai dalam hitungan menit") },
+                { title: tr("Smart Analytics", "Analitik Cerdas"), desc: tr("Track performance easily", "Pantau performa dengan mudah") },
+                { title: tr("24/7 Support", "Dukungan 24/7"), desc: tr("We're here to help", "Kami siap membantu") },
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-4 p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all duration-300">
+                  <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">{item.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <div className="relative">
-              <Input
-                label={t.auth.username}
-                placeholder={tr("Enter your username", "Masukkan username")}
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                disabled={isLoading}
-                className="h-11 pl-10 rounded-lg"
-                required
-              />
-              <User className="absolute left-3 top-[34px] h-4 w-4 text-muted-foreground" />
+            {/* Stats Card */}
+            <div className="grid grid-cols-3 gap-4 mt-8">
+              {[
+                { value: "1000+", label: tr("Businesses", "Bisnis") },
+                { value: "99.9%", label: tr("Uptime", "Uptime") },
+                { value: "24/7", label: tr("Support", "Dukungan") },
+              ].map((stat, i) => (
+                <div key={i} className="text-center p-4 rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 border border-primary/10">
+                  <p className="text-2xl font-bold text-primary">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+                </div>
+              ))}
             </div>
+          </div>
 
+          {/* Right: Register Card */}
+          <div className="w-full max-w-md mx-auto">
             <div className="relative">
-              <Input
-                label={tr("Email", "Email")}
-                type="email"
-                placeholder={tr("Enter your email (optional)", "Masukkan email (opsional)")}
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                disabled={isLoading}
-                className="h-11 pl-10 rounded-lg"
-              />
-              <Mail className="absolute left-3 top-[34px] h-4 w-4 text-muted-foreground" />
+              {/* Card with glassmorphism effect */}
+              <div className="relative backdrop-blur-xl bg-card/80 border border-border/50 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-primary/5">
+                {/* Header */}
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 mb-4 shadow-lg shadow-primary/20">
+                    <Package className="h-7 w-7 text-primary-foreground" />
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
+                    {tr("Get Started", "Mulai Sekarang")}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {tr("Create account to continue", "Buat akun untuk melanjutkan")}
+                  </p>
+                </div>
+
+                {/* Error Alert */}
+                {error && (
+                  <div className="mb-6 p-4 bg-destructive/5 border border-destructive/20 rounded-xl animate-shake">
+                    <p className="text-sm text-destructive flex items-center gap-2 font-medium">
+                      <AlertTriangle className="h-4 w-4 shrink-0" />
+                      {error}
+                    </p>
+                  </div>
+                )}
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground ml-1">
+                      {tr("Full Name", "Nama Lengkap")}
+                    </label>
+                    <div className="relative">
+                      <Input
+                        placeholder={tr("Enter full name", "Masukkan nama lengkap")}
+                        value={formData.fullName}
+                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                        disabled={isLoading}
+                        className="h-12 pl-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all"
+                      />
+                      <UserCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground ml-1">
+                      {t.auth.username}
+                    </label>
+                    <div className="relative">
+                      <Input
+                        placeholder={tr("Enter username", "Masukkan username")}
+                        value={formData.username}
+                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                        disabled={isLoading}
+                        className="h-12 pl-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all"
+                        required
+                      />
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground ml-1">
+                      {tr("Email", "Email")}
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type="email"
+                        placeholder={tr("Enter email (optional)", "Masukkan email (opsional)")}
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        disabled={isLoading}
+                        className="h-12 pl-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all"
+                      />
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground ml-1">
+                      {t.auth.password}
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder={tr("Enter password", "Masukkan password")}
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        disabled={isLoading}
+                        className="h-12 pl-11 pr-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all"
+                        required
+                      />
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors outline-none"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground ml-1">
+                      {tr("Confirm Password", "Konfirmasi Password")}
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder={tr("Re-enter password", "Masukkan ulang password")}
+                        value={formData.confirmPassword}
+                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                        disabled={isLoading}
+                        className="h-12 pl-11 pr-11 rounded-xl border-border/50 focus:border-primary focus:ring-primary/20 transition-all"
+                        required
+                      />
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors outline-none"
+                        tabIndex={-1}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full h-12 text-sm font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all duration-200 bg-gradient-to-r from-primary to-primary/90 mt-2"
+                    size="md"
+                    isLoading={isLoading}
+                  >
+                    {isLoading ? t.common.loading : tr("Create Account", "Buat Akun")}
+                  </Button>
+                </form>
+
+                {/* Footer */}
+                <div className="mt-6 pt-6 border-t border-border/50 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    {tr("Already have an account?", "Sudah punya akun?")}{" "}
+                    <Link href="/login" className="text-primary hover:text-primary/80 font-semibold transition-colors">
+                      {t.auth.signIn}
+                    </Link>
+                  </p>
+                </div>
+              </div>
+
+              {/* Decorative elements */}
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-2xl pointer-events-none" />
             </div>
-
-            <div className="relative">
-              <Input
-                label={t.auth.password}
-                type={showPassword ? "text" : "password"}
-                placeholder={tr("Enter your password", "Masukkan password")}
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                disabled={isLoading}
-                className="h-11 pl-10 pr-10 rounded-lg"
-                required
-              />
-              <Lock className="absolute left-3 top-[34px] h-4 w-4 text-muted-foreground" />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[34px] text-muted-foreground hover:text-foreground transition-colors"
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-
-            <div className="relative">
-              <Input
-                label={tr("Confirm Password", "Konfirmasi Password")}
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder={tr("Re-enter your password", "Masukkan ulang password")}
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                disabled={isLoading}
-                className="h-11 pl-10 pr-10 rounded-lg"
-                required
-              />
-              <Lock className="absolute left-3 top-[34px] h-4 w-4 text-muted-foreground" />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-[34px] text-muted-foreground hover:text-foreground transition-colors"
-                tabIndex={-1}
-              >
-                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full h-11 text-sm font-semibold rounded-lg mt-2 active:scale-[0.98] transition-all"
-              size="md"
-              isLoading={isLoading}
-            >
-              {isLoading ? t.common.loading : tr("Daftar Sekarang", "Create Account")}
-            </Button>
-          </form>
-
-          <p className="text-sm text-center text-muted-foreground mt-6 sm:mt-8">
-            {tr("Already have an account?", "Sudah punya akun?")}{" "}
-            <Link href="/login" className="text-primary hover:underline font-semibold transition-all underline-offset-4">
-              {t.auth.signIn}
-            </Link>
-          </p>
+          </div>
         </div>
       </div>
 
@@ -255,6 +333,12 @@ export default function RegisterPage() {
         }
         .animate-shake {
           animation: shake 0.4s ease-in-out;
+        }
+        .bg-grid-pattern {
+          background-image: 
+            linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+          background-size: 20px 20px;
         }
       `}</style>
     </div>

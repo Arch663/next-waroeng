@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, Suspense, useMemo, useState } from "react";
+import React, { useCallback, Suspense, useMemo } from "react";
 import { StatCard } from "@/components/ui/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton, SkeletonCard } from "@/components/ui/Skeleton";
@@ -8,6 +8,8 @@ import { reportsAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useChartTheme } from "@/lib/useChartTheme";
 import { formatCurrency } from "@/lib/utils";
+import { usePageData } from "@/lib/usePageData";
+import { useDataRefresh } from "@/lib/useDataRefresh";
 import {
   Package,
   AlertTriangle,
@@ -60,37 +62,20 @@ interface DashboardData {
 function DashboardContent() {
   const { t, language } = useLanguage();
   const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const theme = useChartTheme();
 
-  const fetchDashboard = useCallback(async (showLoading = false) => {
-    if (showLoading) setIsLoading(true);
-    try {
+  const { data, isLoading, isRefreshing, refetch } = usePageData<DashboardData>({
+    key: "dashboard",
+    fetchFn: async () => {
       const response = await reportsAPI.getDashboard();
-      const payload = response.data.data as DashboardData;
-      setData(payload);
-      sessionStorage.setItem("dashboard_cache_v2", JSON.stringify(payload));
-    } catch (error) {
-      console.error("Failed to fetch dashboard:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      return response.data.data as DashboardData;
+    },
+  });
 
-  useEffect(() => {
-    const cached = sessionStorage.getItem("dashboard_cache_v2");
-    if (cached && !data) {
-      try {
-        const parsed = JSON.parse(cached) as DashboardData;
-        setData(parsed);
-        setIsLoading(false);
-      } catch {
-        // ignore invalid cache
-      }
-    }
-    fetchDashboard(data === null);
-  }, [fetchDashboard, data]);
+  // Listen for refresh events and auto-refetch dashboard data
+  useDataRefresh(['dashboard', 'checkout', 'reports', 'all'], useCallback(() => {
+    refetch(true);
+  }, [refetch]));
 
   // Destructure theme colors
   const { c1, c2, c3, c4, c5, border } = theme;
@@ -154,7 +139,7 @@ function DashboardContent() {
     };
   }, [data, tr, c1, c3]);
 
-  const categoryColors = [c1, c2, c3, c4, c5, "#8b5cf6", "#06b6d4", "#f43f5e"];
+  const categoryColors = useMemo(() => [c1, c2, c3, c4, c5, c1, c2, c3, c4, c5], [c1, c2, c3, c4, c5]);
   const categoryData = useMemo(() => {
     if (!data) return null;
     return {
@@ -168,20 +153,25 @@ function DashboardContent() {
         },
       ],
     };
-  }, [data, c1, c2, c3, c4, c5]);
+  }, [data, categoryColors]);
 
   const topProductsData = useMemo(() => {
     if (!data) return null;
+    // Sort by totalQty descending, then by _id for stable ordering when values are equal
+    const sortedProducts = [...(data.topProducts || [])].sort((a, b) => {
+      if (b.totalQty !== a.totalQty) return b.totalQty - a.totalQty;
+      return a._id.localeCompare(b._id); // Stable sort for equal values
+    });
     return {
-      labels: (data.topProducts || []).map((p) =>
+      labels: sortedProducts.map((p) =>
         p.productName.length > 15 ? p.productName.slice(0, 15) + "..." : p.productName
       ),
       datasets: [
         {
           label: tr("Qty Sold", "Qty Terjual"),
-          data: (data.topProducts || []).map((p) => p.totalQty),
-          backgroundColor: [c1, c2, c3, c1, c2].map(c => c + "cc"),
-          borderColor: [c1, c2, c3, c1, c2],
+          data: sortedProducts.map((p) => p.totalQty),
+          backgroundColor: [c1, c2, c3, c4, c5].map(c => c + "cc"),
+          borderColor: [c1, c2, c3, c4, c5],
           borderWidth: 2,
           borderRadius: 6,
         },
@@ -202,6 +192,8 @@ function DashboardContent() {
       </div>
     );
   }
+
+  const isRefreshingUI = isRefreshing;
 
   const chartOptions: any = {
     responsive: true,
@@ -265,7 +257,7 @@ function DashboardContent() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className={`space-y-4 sm:space-y-6 transition-opacity duration-200 ${isRefreshingUI ? 'opacity-60' : 'opacity-100'}`}>
       {/* Page Header */}
       <div className="flex flex-col gap-1 sm:gap-2">
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">Dashboard</h1>

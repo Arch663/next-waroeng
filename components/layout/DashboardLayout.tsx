@@ -6,7 +6,6 @@ import { useAuthStore, useUIStore } from "@/lib/store";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { LowStockAlert } from "@/components/layout/LowStockAlert";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/lib/LanguageContext";
 
@@ -22,7 +21,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const token = useAuthStore((state) => state.token);
   const sidebarOpen = useUIStore((state) => state.sidebarOpen);
   const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
-  const [isLoading, setIsLoading] = React.useState(true);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -36,7 +34,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
       const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
       setSidebarOpen(isDesktop);
-      setIsLoading(false);
     };
 
     checkAuth();
@@ -59,14 +56,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     const routeTitle = routeMap[currentPath]?.[language] ?? (language === "id" ? "Aplikasi" : "App");
     document.title = `Waroeng - ${routeTitle}`;
   }, [pathname, language]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Skeleton variant="circular" width={48} height={48} />
-      </div>
-    );
-  }
 
   if (!isAuthenticated || !token) {
     return null;

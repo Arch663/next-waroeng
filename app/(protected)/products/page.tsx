@@ -12,6 +12,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { productsAPI, categoriesAPI } from "@/lib/api";
 import { useCartStore } from "@/lib/store";
 import { useLanguage } from "@/lib/LanguageContext";
+import { usePageData } from "@/lib/usePageData";
+import { usePageCache } from "@/lib/usePageCache";
 import { Search, Plus, Grid, List, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -21,14 +23,10 @@ type ViewMode = "grid" | "list";
 export default function ProductsPage() {
   const { t, language } = useLanguage();
   const tr = (en: string, id: string) => (language === "id" ? id : en);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [page, setPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
 
   // Modal states
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -54,37 +52,31 @@ export default function ProductsPage() {
   const items = useCartStore((state) => state.items);
   const addItem = useCartStore((state) => state.addItem);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const invalidateCache = usePageCache((state) => state.invalidateCache);
 
-  const fetchProducts = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const params: Record<string, unknown> = { page, limit: 20 };
-      if (searchTerm) params.search = searchTerm;
-      if (selectedCategory) params.categoryId = selectedCategory;
+  const params: Record<string, unknown> = { page, limit: 20 };
+  if (searchTerm) params.search = searchTerm;
+  if (selectedCategory) params.categoryId = selectedCategory;
 
+  const { data: productsData, isLoading, isRefreshing, refetch } = usePageData<{ products: Product[]; pagination: { total: number } }>({
+    key: "products",
+    fetchFn: async () => {
       const response = await productsAPI.getAll(params);
-      setProducts(response.data.data.products);
-      setTotalItems(response.data.data.pagination.total);
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, searchTerm, selectedCategory]);
+      return response.data.data;
+    },
+    params,
+  });
 
-  const fetchCategories = useCallback(async () => {
-    try {
+  const products = productsData?.products || [];
+  const totalItems = productsData?.pagination?.total || 0;
+
+  const { data: categories, refetch: refetchCategories } = usePageData<{ _id: string; name: string }[]>({
+    key: "categories",
+    fetchFn: async () => {
       const response = await categoriesAPI.getAll();
-      setCategories(response.data.data);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, [fetchProducts, fetchCategories]);
+      return response.data.data;
+    },
+  });
 
   const handleOpenModal = useCallback((product?: Product) => {
     if (product) {
@@ -110,7 +102,7 @@ export default function ProductsPage() {
         stock: "0",
         unit: "pcs",
         minStock: "5",
-        categoryId: categories[0]?._id || "",
+        categoryId: categories?.[0]?._id || "",
         image: "",
       });
     }
@@ -138,22 +130,24 @@ export default function ProductsPage() {
       }
 
       setIsProductModalOpen(false);
-      fetchProducts();
+      invalidateCache("products");
+      refetch(true);
     } catch (error) {
       console.error("Failed to save product:", error);
     }
-  }, [editingProduct, fetchProducts, formData]);
+  }, [editingProduct, formData, invalidateCache, refetch]);
 
   const handleDelete = useCallback(async () => {
     if (!deleteId) return;
     try {
       await productsAPI.delete(deleteId);
       setDeleteId(null);
-      fetchProducts();
+      invalidateCache("products");
+      refetch(true);
     } catch (error) {
       console.error("Failed to delete product:", error);
     }
-  }, [deleteId, fetchProducts]);
+  }, [deleteId, invalidateCache, refetch]);
 
   const handleAddToCart = useCallback((product: Product) => {
     setSelectedProductForCart(product);
@@ -233,7 +227,7 @@ export default function ProductsPage() {
               className="w-full sm:w-auto px-3 py-2 bg-card border border-input rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring sm:min-w-40"
             >
               <option value="">{tr("All Categories", "Semua Kategori")}</option>
-              {categories.map((cat) => (
+              {categories?.map((cat) => (
                 <option key={cat._id} value={cat._id}>
                   {cat.name}
                 </option>
@@ -262,28 +256,30 @@ export default function ProductsPage() {
       </Card>
 
       {/* Products Display */}
-      {isLoading ? (
-        <div className={cn(viewMode === "grid" ? "grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "")}>
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} variant="rectangular" className="h-64 sm:h-72" />
-          ))}
-        </div>
-      ) : viewMode === "grid" ? (
-        <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {productGrid}
-        </div>
-      ) : (
-        <InventoryTable
-          items={products as unknown as InventoryItem[]}
-          onEdit={handleOpenModal}
-          onDelete={(id) => setDeleteId(id)}
-          totalItems={totalItems}
-          page={page}
-          onPageChange={setPage}
-          onSearch={setSearchTerm}
-          hideSearch={true}
-        />
-      )}
+      <div className={`transition-opacity duration-200 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`}>
+        {isLoading && products.length === 0 ? (
+          <div className={cn(viewMode === "grid" ? "grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "")}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} variant="rectangular" className="h-64 sm:h-72" />
+            ))}
+          </div>
+        ) : viewMode === "grid" ? (
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {productGrid}
+          </div>
+        ) : (
+          <InventoryTable
+            items={products as unknown as InventoryItem[]}
+            onEdit={handleOpenModal}
+            onDelete={(id) => setDeleteId(id)}
+            totalItems={totalItems}
+            page={page}
+            onPageChange={setPage}
+            onSearch={setSearchTerm}
+            hideSearch={true}
+          />
+        )}
+      </div>
 
         {/* Product Modal */}
         <Modal
@@ -386,7 +382,7 @@ export default function ProductsPage() {
                   required
                 >
                   <option value="">{t.products.selectCategory}</option>
-                  {categories.map((cat) => (
+                  {categories?.map((cat) => (
                     <option key={cat._id} value={cat._id}>
                       {cat.name}
                     </option>

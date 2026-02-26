@@ -12,6 +12,7 @@ import { productsAPI, transactionsAPI } from "@/lib/api";
 import { useCartStore } from "@/lib/store";
 import { useLanguage } from "@/lib/LanguageContext";
 import { formatCurrency } from "@/lib/utils";
+import { useDataRefresher, triggerDataRefresh } from "@/lib/useDataRefresh";
 import { Search, ShoppingCart, Trash2, Plus, Minus, Package } from "lucide-react";
 
 interface Product {
@@ -29,6 +30,7 @@ interface CartItemToRemove {
 function CheckoutContent() {
     const { t, language } = useLanguage();
     const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
+    const { triggerRefresh } = useDataRefresher();
 
     const [searchTerm, setSearchTerm] = useState("");
     const [isLoading, setIsLoading] = useState(true);
@@ -108,6 +110,9 @@ function CheckoutContent() {
             clearCart();
             setIsCheckoutModalOpen(false);
             setCashPaid("");
+            // Trigger data refresh for dashboard and reports
+            triggerRefresh('dashboard');
+            triggerRefresh('checkout');
         } catch (error: any) {
             console.error("Checkout error:", error);
             setAlertState({ open: true, title: "Error", message: "Failed to process transaction", variant: "error" });

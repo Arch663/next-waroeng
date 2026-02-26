@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { productsAPI, reportsAPI, categoriesAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
+import { usePageData } from "@/lib/usePageData";
 import { formatDate } from "@/lib/utils";
 
 interface HistoryItem {
@@ -28,15 +29,8 @@ interface HistoryItem {
 function InventoryContent() {
   const { t, language } = useLanguage();
   const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
-  const [products, setProducts] = useState<InventoryItem[]>([]);
-  const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
   const [historyPage, setHistoryPage] = useState(1);
-  const [totalHistory, setTotalHistory] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
@@ -51,54 +45,41 @@ function InventoryContent() {
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const fetchProducts = useCallback(async (showLoading = false) => {
-    if (showLoading) setIsLoading(true);
-    else setIsRefreshing(true);
-    try {
-      const params: { page: number; limit: number; search?: string; categoryId?: string } = { page, limit: 10 };
-      if (searchTerm) params.search = searchTerm;
-      if (selectedCategory) params.categoryId = selectedCategory;
+  const params: Record<string, unknown> = { page, limit: 10 };
+  if (searchTerm) params.search = searchTerm;
+  if (selectedCategory) params.categoryId = selectedCategory;
+
+  const { data: productsData, isLoading, isRefreshing, refetch: refetchProducts } = usePageData<{ products: InventoryItem[]; pagination: { total: number } }>({
+    key: "inventory-products",
+    fetchFn: async () => {
       const response = await productsAPI.getAll(params);
-      setProducts(response.data.data.products || []);
-      setTotalItems(response.data.data.pagination?.total || 0);
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }, [page, searchTerm, selectedCategory]);
+      return response.data.data;
+    },
+    params,
+  });
 
-  const fetchCategories = useCallback(async () => {
-    try {
+  const products = productsData?.products || [];
+  const totalItems = productsData?.pagination?.total || 0;
+
+  const { data: categories } = usePageData<{ _id: string; name: string }[]>({
+    key: "categories",
+    fetchFn: async () => {
       const response = await categoriesAPI.getAll();
-      setCategories(response.data.data || []);
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-    }
-  }, []);
+      return response.data.data;
+    },
+  });
 
-  const fetchHistory = useCallback(async () => {
-    try {
+  const { data: historyData } = usePageData<{ history: HistoryItem[]; pagination: { total: number } }>({
+    key: "inventory-history",
+    fetchFn: async () => {
       const response = await reportsAPI.getHistory({ page: historyPage, limit: 10 });
-      setHistory(response.data.data.history || []);
-      setTotalHistory(response.data.data.pagination?.total || 0);
-    } catch (error) {
-      console.error("Failed to fetch history:", error);
-    }
-  }, [historyPage]);
+      return response.data.data;
+    },
+    params: { page: historyPage, limit: 10 },
+  });
 
-  useEffect(() => {
-    fetchProducts(products.length === 0);
-  }, [fetchProducts]);
-
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
-
-  useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+  const history = historyData?.history || [];
+  const totalHistory = historyData?.pagination?.total || 0;
 
   const handleOpenModal = (product?: InventoryItem) => {
     if (product) {
@@ -115,7 +96,7 @@ function InventoryContent() {
         name: "",
         price: "",
         stock: "0",
-        categoryId: categories[0]?._id || "",
+        categoryId: categories?.[0]?._id || "",
       });
     }
     setIsProductModalOpen(true);
@@ -138,8 +119,7 @@ function InventoryContent() {
       }
 
       setIsProductModalOpen(false);
-      fetchProducts(false);
-      fetchHistory();
+      refetchProducts(true);
     } catch (error) {
       console.error("Failed to save product:", error);
     }
@@ -150,8 +130,7 @@ function InventoryContent() {
     try {
       await productsAPI.delete(deleteId);
       setDeleteId(null);
-      fetchProducts(false);
-      fetchHistory();
+      refetchProducts(true);
     } catch (error) {
       console.error("Failed to delete product:", error);
     }
@@ -199,7 +178,7 @@ function InventoryContent() {
               className="w-full sm:w-auto px-4 py-2.5 bg-card border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="">{tr("All Categories", "Semua Kategori")}</option>
-              {categories.map((cat) => (
+              {categories?.map((cat) => (
                 <option key={cat._id} value={cat._id}>
                   {cat.name}
                 </option>
@@ -311,7 +290,7 @@ function InventoryContent() {
             <label className="block text-sm font-medium mb-1.5">{t.products.category}</label>
             <select value={formData.categoryId} onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })} className="w-full px-4 py-2.5 bg-card border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring" required>
               <option value="">{t.products.selectCategory}</option>
-              {categories.map((cat) => (
+              {categories?.map((cat) => (
                 <option key={cat._id} value={cat._id}>{cat.name}</option>
               ))}
             </select>

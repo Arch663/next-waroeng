@@ -57,9 +57,8 @@ function ReportsContent() {
 
   const { c1, c2, c3, c4, c5, border } = theme;
 
-  const fetchReports = useCallback(async (showLoading = false) => {
-    if (showLoading) setIsLoading(true);
-    else setIsRefreshing(true);
+  const fetchReports = useCallback(async () => {
+    setIsRefreshing(true);
     try {
       const [dashboard, sales, purchases, profit] = await Promise.all([
         reportsAPI.getDashboard(),
@@ -81,7 +80,8 @@ function ReportsContent() {
 
   useEffect(() => {
     const isFirstLoad = !dashboardData;
-    fetchReports(isFirstLoad);
+    if (isFirstLoad) setIsLoading(true);
+    fetchReports();
   }, [fetchReports]);
 
   // Handle Export PDF

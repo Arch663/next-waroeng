@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState, Suspense } from "react";
+import React, { useCallback, useState, Suspense } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -10,6 +10,7 @@ import { AlertModal } from "@/components/ui/AlertModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { categoriesAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
+import { usePageData } from "@/lib/usePageData";
 import { Pencil, Plus, Tags, Trash2 } from "lucide-react";
 
 interface Category {
@@ -21,8 +22,6 @@ function CategoriesContent() {
   const { language, t } = useLanguage();
   const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -39,26 +38,13 @@ function CategoriesContent() {
     variant: "info",
   });
 
-  const fetchCategories = useCallback(async (showLoading = false) => {
-    if (showLoading) setIsLoading(true);
-    try {
+  const { data: categories, isLoading, refetch } = usePageData<Category[]>({
+    key: "categories",
+    fetchFn: async () => {
       const res = await categoriesAPI.getAll();
-      setCategories(res.data?.data || []);
-    } catch {
-      setAlert({
-        open: true,
-        title: tr("Error", "Error"),
-        message: tr("Failed to fetch categories.", "Gagal memuat kategori."),
-        variant: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [tr]);
-
-  useEffect(() => {
-    fetchCategories(true);
-  }, [fetchCategories]);
+      return res.data?.data || [];
+    },
+  });
 
   const openCreate = () => {
     setEditingCategory(null);
@@ -83,7 +69,7 @@ function CategoriesContent() {
       }
       setIsModalOpen(false);
       setName("");
-      await fetchCategories(false);
+      refetch(true);
       setAlert({
         open: true,
         title: t.common.success,
@@ -114,7 +100,7 @@ function CategoriesContent() {
     try {
       await categoriesAPI.delete(deleteId);
       setDeleteId(null);
-      await fetchCategories(false);
+      refetch(true);
       setAlert({
         open: true,
         title: t.common.success,
@@ -138,7 +124,7 @@ function CategoriesContent() {
     }
   };
 
-  if (isLoading && categories.length === 0) {
+  if (isLoading && (!categories || categories.length === 0)) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -171,7 +157,7 @@ function CategoriesContent() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 transition-opacity duration-200 ${isLoading ? 'opacity-60' : 'opacity-100'}`}>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold sm:text-3xl">{tr("Categories", "Kategori")}</h1>
@@ -193,7 +179,7 @@ function CategoriesContent() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {categories.length === 0 ? (
+          {!categories || categories.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground">
               {tr("No categories found.", "Belum ada kategori.")}
             </div>
