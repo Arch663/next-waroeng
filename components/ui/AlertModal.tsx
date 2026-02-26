@@ -50,15 +50,15 @@ export const AlertModal: React.FC<AlertModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title || t.common.confirm} size="sm">
-      <div className="space-y-5">
+      <div className="space-y-4">
         <div className="flex items-start gap-3">
-          <div className={cn("rounded-xl p-2.5", config[variant].bgClass)}>
+          <div className={cn("rounded-lg p-2", config[variant].bgClass)}>
             <Icon className={cn("h-5 w-5", config[variant].iconClass)} />
           </div>
           <p className="text-sm leading-relaxed text-foreground">{message}</p>
         </div>
         <div className="flex justify-end">
-          <Button onClick={onClose} className="min-w-24">
+          <Button onClick={onClose} className="min-w-20">
             <X className="mr-2 h-4 w-4" />
             {t.common.close}
           </Button>

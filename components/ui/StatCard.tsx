@@ -24,10 +24,10 @@ export const StatCard: React.FC<StatCardProps> = React.memo(({
 }) => {
   const variants = {
     default: "bg-card",
-    primary: "bg-primary/12 border-primary/35",
-    success: "bg-success/12 border-success/35",
-    warning: "bg-warning/12 border-warning/35",
-    destructive: "bg-destructive/12 border-destructive/35",
+    primary: "bg-primary/5 border-primary/20",
+    success: "bg-success/5 border-success/20",
+    warning: "bg-warning/5 border-warning/20",
+    destructive: "bg-destructive/5 border-destructive/20",
   };
 
   const getIconColor = () => {
@@ -46,13 +46,13 @@ export const StatCard: React.FC<StatCardProps> = React.memo(({
   };
 
   return (
-    <div className={cn("rounded-2xl border border-border p-6 shadow-sm transition-all duration-200 hover:shadow-md", variants[variant], className)}>
+    <div className={cn("rounded-lg border border-border p-5 transition-all duration-150 hover:bg-muted/30", variants[variant], className)}>
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <p className="text-sm font-medium text-muted-foreground">
             {title}
           </p>
-          <p className="text-2xl font-bold tracking-tight text-foreground">
+          <p className="text-2xl font-semibold tracking-tight text-foreground">
             {typeof value === "number" && value > 1000 ? value.toLocaleString() : value}
           </p>
           {trend && (
@@ -62,15 +62,15 @@ export const StatCard: React.FC<StatCardProps> = React.memo(({
                 trend.value >= 0 ? "text-success" : "text-destructive"
               )}>
                 {trend.value >= 0 ? "+" : ""}{trend.value}%
-              </span> 
+              </span>
               <span className="text-xs text-muted-foreground">
                 {trend.label}
               </span>
             </div>
           )}
         </div>
-        <div className={cn("p-3 rounded-xl bg-card/70", getIconColor())}>
-          {icon || <Package className="h-6 w-6" />}
+        <div className={cn("p-2.5 rounded-lg bg-muted/50", getIconColor())}>
+          {icon || <Package className="h-5 w-5" />}
         </div>
       </div>
     </div>

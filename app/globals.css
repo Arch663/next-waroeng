@@ -1,59 +1,59 @@
 @import "tailwindcss";
 
 :root {
-  /* Eva-02 Light with 70/30/10: 70% warm neutral, 30% orange-red primary, 10% accent */
-  --background: #fff6f2;
-  --background-secondary: #ffede5;
-  --foreground: #2c1713;
-  --foreground-secondary: #7f5046;
-  --border: #f0c8bb;
-  --primary: #d6452b;
-  --primary-hover: #b93823;
-  --primary-foreground: #fff7f3;
-  --destructive: #a61e1e;
-  --destructive-hover: #8f1818;
-  --success: #3f8c4f;
-  --warning: #e18a19;
-  --muted: #f8dfd4;
-  --muted-foreground: #8d6057;
-  --card: #fffaf8;
-  --card-foreground: #2c1713;
-  --input: #e7b6a7;
-  --ring: #e65a34;
+  /* Modern Minimalist Light */
+  --background: #ffffff;
+  --background-secondary: #fafafa;
+  --foreground: #0a0a0a;
+  --foreground-secondary: #525252;
+  --border: #e5e5e5;
+  --primary: #171717;
+  --primary-hover: #262626;
+  --primary-foreground: #fafafa;
+  --destructive: #dc2626;
+  --destructive-hover: #b91c1c;
+  --success: #16a34a;
+  --warning: #ca8a04;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --input: #e5e5e5;
+  --ring: #171717;
 
-  --chart-1: #d6452b;
-  --chart-2: #ef7b45;
-  --chart-3: #e18a19;
-  --chart-4: #3f8c4f;
-  --chart-5: #a61e1e;
+  --chart-1: #171717;
+  --chart-2: #525252;
+  --chart-3: #a3a3a3;
+  --chart-4: #16a34a;
+  --chart-5: #ca8a04;
 }
 
 .dark {
-  /* Eva-01 Dark with 70/30/10: 70% dark neutral, 30% purple primary, 10% green/amber accent */
-  --background: #110d1a;
-  --background-secondary: #191327;
-  --foreground: #eee7ff;
-  --foreground-secondary: #b8adc8;
-  --border: #302444;
-  --primary: #7d58c2;
-  --primary-hover: #6b48ae;
-  --primary-foreground: #f8f3ff;
-  --destructive: #e14b56;
-  --destructive-hover: #c53f49;
-  --success: #8ecf4f;
-  --warning: #d5a72a;
-  --muted: #211932;
-  --muted-foreground: #ab9fc0;
-  --card: #191327;
-  --card-foreground: #eee7ff;
-  --input: #382b50;
-  --ring: #98df5e;
+  /* Modern Minimalist Dark */
+  --background: #0a0a0a;
+  --background-secondary: #171717;
+  --foreground: #fafafa;
+  --foreground-secondary: #a3a3a3;
+  --border: #262626;
+  --primary: #fafafa;
+  --primary-hover: #e5e5e5;
+  --primary-foreground: #0a0a0a;
+  --destructive: #ef4444;
+  --destructive-hover: #dc2626;
+  --success: #22c55e;
+  --warning: #eab308;
+  --muted: #171717;
+  --muted-foreground: #a3a3a3;
+  --card: #0a0a0a;
+  --card-foreground: #fafafa;
+  --input: #262626;
+  --ring: #fafafa;
 
-  --chart-1: #7d58c2;
-  --chart-2: #9d7edb;
-  --chart-3: #d5a72a;
-  --chart-4: #8ecf4f;
-  --chart-5: #e14b56;
+  --chart-1: #fafafa;
+  --chart-2: #d4d4d4;
+  --chart-3: #a3a3a3;
+  --chart-4: #22c55e;
+  --chart-5: #eab308;
 }
 
 @theme inline {
@@ -84,14 +84,32 @@
 }
 
 body {
-  background:
-    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--primary) 10%, transparent) 0%, transparent 40%),
-    linear-gradient(180deg, var(--background-secondary) 0%, var(--background) 45%);
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  transition: background-color 0.2s ease, color 0.2s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography scale */
+h1 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: clamp(1rem, 2vw, 1.125rem);
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 @keyframes shimmer {
@@ -110,12 +128,14 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--muted-foreground) 70%, transparent);
+  background: var(--muted-foreground);
   border-radius: 999px;
+  opacity: 0.5;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--foreground-secondary);
+  opacity: 0.7;
 }
 
 @layer utilities {

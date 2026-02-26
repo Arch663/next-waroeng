@@ -117,43 +117,46 @@ function CheckoutContent() {
     const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between flex-wrap gap-4 px-1 sm:px-0">
+        <div className="space-y-4 sm:space-y-6">
+            {/* Page Header */}
+            <div className="flex items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight [@media(max-width:400px)]:text-xl">{t.cashier.checkout}</h1>
-                    <p className="text-muted-foreground mt-1 text-sm [@media(max-width:400px)]:text-xs">
+                    <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">{t.cashier.checkout}</h1>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                         {tr("Process sales and manage cart", "Proses penjualan dan kelola keranjang")}
                     </p>
                 </div>
                 {items.length > 0 && (
-                    <Button variant="outline" size="sm" onClick={() => setIsClearCartModalOpen(true)} className="[@media(max-width:400px)]:w-full">
+                    <Button variant="outline" size="sm" onClick={() => setIsClearCartModalOpen(true)} className="hidden sm:flex">
                         <Trash2 className="h-4 w-4 mr-2" />
                         {tr("Clear", "Kosongkan")}
                     </Button>
                 )}
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-3 px-1 sm:px-0">
+            {/* Main Grid - Mobile: stacked, Desktop: 2/3 + 1/3 */}
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
+                {/* Cart Section - Takes 2 columns on desktop */}
                 <div className="lg:col-span-2 space-y-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center justify-between">
+                            <CardTitle className="flex items-center justify-between text-sm sm:text-base">
                                 <span className="flex items-center gap-2">
-                                    <ShoppingCart className="h-5 w-5 text-primary" />
+                                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                                     {t.cashier.cart}
                                 </span>
                                 {cartItemCount > 0 && (
-                                    <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full font-bold">
-                                        {cartItemCount} item
+                                    <span className="text-xs sm:text-sm bg-primary/10 text-primary px-2.5 py-1 rounded-lg font-semibold">
+                                        {cartItemCount} {tr("items", "item")}
                                     </span>
                                 )}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
                             {items.length === 0 ? (
-                                <div className="text-center py-16">
-                                    <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                                <div className="text-center py-12 sm:py-16">
+                                    <Package className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                                    <h3 className="text-base sm:text-lg font-semibold text-foreground mb-3">
                                         {tr("Cart is Empty", "Keranjang Kosong")}
                                     </h3>
                                     <Button onClick={() => setIsAddProductModalOpen(true)}>
@@ -166,25 +169,25 @@ function CheckoutContent() {
                                     {items.map((item) => (
                                         <div
                                             key={item.productId}
-                                            className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-muted/30 rounded-xl border border-border"
+                                            className="flex flex-col gap-3 p-3 sm:p-4 bg-muted/30 rounded-lg border border-border"
                                         >
                                             <div className="flex-1 min-w-0">
-                                                <h4 className="font-semibold text-foreground truncate">{item.productName}</h4>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {formatCurrency(item.price)} / item
+                                                <h4 className="font-semibold text-foreground text-sm sm:text-base truncate">{item.productName}</h4>
+                                                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                                                    {formatCurrency(item.price)} / {tr("item", "item")}
                                                 </p>
                                             </div>
 
-                                            {/* Controls (Mobile Responsive) */}
-                                            <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 sm:gap-6 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-border/50 [@media(max-width:400px)]:flex-col [@media(max-width:400px)]:items-stretch">
-                                                <div className="flex items-center gap-2 justify-center">
+                                            {/* Controls - Responsive layout */}
+                                            <div className="flex items-center justify-between gap-3">
+                                                <div className="flex items-center gap-2">
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
                                                         onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                                                        className="rounded-xl h-8 w-8 p-0"
+                                                        className="h-8 w-8 p-0"
                                                     >
-                                                        <Minus className="h-3 w-3" />
+                                                        <Minus className="h-3.5 w-3.5" />
                                                     </Button>
                                                     <span className="w-8 text-center font-medium text-sm">{item.quantity}</span>
                                                     <Button
@@ -192,15 +195,15 @@ function CheckoutContent() {
                                                         size="sm"
                                                         onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                                                         disabled={item.quantity >= item.stock}
-                                                        className="rounded-xl h-8 w-8 p-0"
+                                                        className="h-8 w-8 p-0"
                                                     >
-                                                        <Plus className="h-3 w-3" />
+                                                        <Plus className="h-3.5 w-3.5" />
                                                     </Button>
                                                 </div>
 
-                                                <div className="flex items-center justify-between sm:justify-end gap-3 [@media(max-width:400px)]:border-t [@media(max-width:400px)]:pt-3 [@media(max-width:400px)]:mt-1">
-                                                    <div className="text-right min-w-[100px]">
-                                                        <p className="font-bold text-primary">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="text-right">
+                                                        <p className="font-bold text-primary text-sm sm:text-base">
                                                             {formatCurrency(item.price * item.quantity)}
                                                         </p>
                                                     </div>
@@ -209,7 +212,7 @@ function CheckoutContent() {
                                                         variant="ghost"
                                                         size="sm"
                                                         onClick={() => handleRemoveFromCart(item.productId, item.productName)}
-                                                        className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                                                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
@@ -218,12 +221,14 @@ function CheckoutContent() {
                                         </div>
                                     ))}
 
-                                    <div className="border-t border-border pt-4 mt-6 flex justify-between items-center text-xl font-bold px-1">
-                                        <span className="text-muted-foreground text-sm uppercase tracking-tight">{tr("Total:", "Total Belanja:")}</span>
-                                        <span className="text-primary">{formatCurrency(totalAmount)}</span>
+                                    {/* Total */}
+                                    <div className="border-t border-border pt-3 sm:pt-4 mt-4 sm:mt-6 flex justify-between items-center px-1">
+                                        <span className="text-xs sm:text-sm text-muted-foreground uppercase tracking-tight">{tr("Total:", "Total Belanja:")}</span>
+                                        <span className="text-lg sm:text-xl font-bold text-primary">{formatCurrency(totalAmount)}</span>
                                     </div>
 
-                                    <div className="flex gap-3 pt-4">
+                                    {/* Add More Button */}
+                                    <div className="flex gap-3 pt-3 sm:pt-4">
                                         <Button variant="outline" className="flex-1" onClick={() => setIsAddProductModalOpen(true)}>
                                             <Plus className="h-4 w-4 mr-2" />
                                             {tr("Add More", "Tambah Produk Lagi")}
@@ -235,22 +240,23 @@ function CheckoutContent() {
                     </Card>
                 </div>
 
+                {/* Summary Sidebar - Takes 1 column on desktop */}
                 <div className="lg:col-span-1">
-                    <Card className="sticky top-24">
+                    <Card className="lg:sticky lg:top-24">
                         <CardHeader>
-                            <CardTitle className="text-lg">{tr("Summary", "Ringkasan Pesanan")}</CardTitle>
+                            <CardTitle className="text-sm sm:text-base">{tr("Summary", "Ringkasan Pesanan")}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4 pt-0">
-                            <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center justify-between text-xs sm:text-sm">
                                 <span className="text-muted-foreground">{tr("Items", "Total Item")}</span>
                                 <span className="font-semibold">{cartItemCount}</span>
                             </div>
                             <div className="border-t border-border pt-4">
-                                <div className="flex items-center justify-between mb-6">
-                                    <span className="text-lg font-semibold uppercase text-xs tracking-wider text-muted-foreground">Total</span>
-                                    <span className="text-xl font-bold text-primary">{formatCurrency(totalAmount)}</span>
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{tr("Total", "Total")}</span>
+                                    <span className="text-lg sm:text-xl font-bold text-primary">{formatCurrency(totalAmount)}</span>
                                 </div>
-                                <Button className="w-full h-12 rounded-xl font-bold" size="lg" disabled={items.length === 0} onClick={() => setIsCheckoutModalOpen(true)}>
+                                <Button className="w-full h-11 sm:h-12 rounded-lg font-semibold" size="md" disabled={items.length === 0} onClick={() => setIsCheckoutModalOpen(true)}>
                                     {tr("Payment", "Bayar Sekarang")}
                                 </Button>
                             </div>

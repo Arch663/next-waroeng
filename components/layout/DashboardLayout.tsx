@@ -77,13 +77,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       <Sidebar />
       <div
         className={cn(
-          "min-h-screen flex flex-col transition-all duration-300 ease-in-out",
-          "ml-0 lg:ml-64",
-          !sidebarOpen && "lg:ml-20"
+          "min-h-screen flex flex-col transition-all duration-200 ease-in-out",
+          "ml-0 lg:ml-60",
+          !sidebarOpen && "lg:ml-16"
         )}
       >
         <Header />
-        <main className="flex-1 p-4 sm:p-6">{children}</main>
+        <main className="flex-1 p-3 sm:p-5 lg:p-6">{children}</main>
       </div>
       <LowStockAlert />
     </div>

@@ -190,98 +190,100 @@ export default function ProductsPage() {
   );
 
   return (
-    <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold sm:text-3xl">{t.products.title}</h1>
-            <p className="text-sm text-muted-foreground mt-1 sm:text-base">
-              {tr("Manage your product catalog", "Kelola katalog produk Anda")}
-            </p>
-          </div>
-          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center sm:justify-end">
-            <Link href="/checkout" className="w-full sm:w-auto">
-              <Button variant="outline" className="w-full sm:w-auto">
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                {tr("Go to Checkout", "Ke Checkout")}
-              </Button>
-            </Link>
-            <Button onClick={() => handleOpenModal()} className="w-full sm:w-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              {t.products.addProduct}
-            </Button>
-          </div>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header - Mobile first stacked layout */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">{t.products.title}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+            {tr("Manage your product catalog", "Kelola katalog produk Anda")}
+          </p>
         </div>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Link href="/checkout" className="flex-1 sm:flex-none">
+            <Button variant="outline" className="w-full">
+              <ShoppingCart className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">{tr("Go to Checkout", "Ke Checkout")}</span>
+              <span className="sm:hidden">Checkout</span>
+            </Button>
+          </Link>
+          <Button onClick={() => handleOpenModal()} className="flex-1 sm:flex-none">
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{t.products.addProduct}</span>
+            <span className="sm:hidden">Add</span>
+          </Button>
+        </div>
+      </div>
 
-        {/* Filters */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="w-full sm:flex-1 sm:min-w-64">
-                <Input
-                  placeholder={t.cashier.searchProduct}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  icon={<Search className="h-4 w-4" />}
-                />
-              </div>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full sm:w-auto px-4 py-2.5 bg-card border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="">{tr("All Categories", "Semua Kategori")}</option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <Button
-                  variant={viewMode === "grid" ? "primary" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                  className="flex-1 sm:flex-none"
-                >
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "primary" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                  className="flex-1 sm:flex-none"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
+      {/* Filters - Responsive layout */}
+      <Card>
+        <CardContent className="pt-4 sm:pt-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex-1 min-w-0">
+              <Input
+                placeholder={t.cashier.searchProduct}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                icon={<Search className="h-4 w-4" />}
+              />
             </div>
-          </CardContent>
-        </Card>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full sm:w-auto px-3 py-2 bg-card border border-input rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring sm:min-w-40"
+            >
+              <option value="">{tr("All Categories", "Semua Kategori")}</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === "grid" ? "primary" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+                className="flex-1 sm:flex-none px-3"
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "primary" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className="flex-1 sm:flex-none px-3"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Products Display */}
-        {isLoading ? (
-          <div className={cn(viewMode === "grid" ? "grid gap-4 md:grid-cols-3 lg:grid-cols-4" : "")}>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} variant="rectangular" className="h-80" />
-            ))}
-          </div>
-        ) : viewMode === "grid" ? (
-          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {productGrid}
-          </div>
-        ) : (
-          <InventoryTable
-            items={products as unknown as InventoryItem[]}
-            onEdit={handleOpenModal}
-            onDelete={(id) => setDeleteId(id)}
-            totalItems={totalItems}
-            page={page}
-            onPageChange={setPage}
-            onSearch={setSearchTerm}
-            hideSearch={true}
-          />
-        )}
+      {/* Products Display */}
+      {isLoading ? (
+        <div className={cn(viewMode === "grid" ? "grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "")}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} variant="rectangular" className="h-64 sm:h-72" />
+          ))}
+        </div>
+      ) : viewMode === "grid" ? (
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {productGrid}
+        </div>
+      ) : (
+        <InventoryTable
+          items={products as unknown as InventoryItem[]}
+          onEdit={handleOpenModal}
+          onDelete={(id) => setDeleteId(id)}
+          totalItems={totalItems}
+          page={page}
+          onPageChange={setPage}
+          onSearch={setSearchTerm}
+          hideSearch={true}
+        />
+      )}
 
         {/* Product Modal */}
         <Modal

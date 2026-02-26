@@ -19,7 +19,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-foreground mb-1.5">
+          <label className="block text-sm font-medium text-foreground mb-1">
             {label}
           </label>
         )}
@@ -34,10 +34,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             onFocus={handleFocus}
             className={cn(
-              "w-full px-4 py-2.5 bg-background/65 backdrop-blur-sm border border-input rounded-xl text-foreground placeholder:text-muted-foreground",
-              "focus:outline-none focus:ring-2 focus:ring-ring/70 focus:border-transparent focus:ring-offset-1 focus:ring-offset-background",
+              "w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground",
+              "focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-transparent focus:ring-offset-0",
               "disabled:opacity-50 disabled:cursor-not-allowed",
-              "transition-all duration-200",
+              "transition-all duration-150",
               icon && "pl-10",
               error && "border-destructive focus:ring-destructive",
               className
@@ -46,7 +46,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
         </div>
         {error && (
-          <p className="mt-1.5 text-sm text-destructive">{error}</p>
+          <p className="mt-1 text-xs text-destructive">{error}</p>
         )}
       </div>
     );

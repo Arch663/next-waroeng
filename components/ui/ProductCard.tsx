@@ -39,7 +39,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
 
   return (
     <div className={cn(
-      "bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all duration-200",
+      "bg-card rounded-lg border border-border overflow-hidden transition-all duration-150 hover:bg-muted/30",
       className
     )}>
       {/* Image */}
@@ -53,19 +53,19 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
           />
         ) : (
           <div className="flex items-center justify-center h-full">
-            <Package className="h-16 w-16 text-muted-foreground" />
+            <Package className="h-12 w-12 text-muted-foreground" />
           </div>
         )}
         {isOutOfStock && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <span className="bg-destructive text-white px-3 py-1 rounded-full text-sm font-medium">
+            <span className="bg-destructive text-white px-3 py-1 rounded-lg text-xs font-medium">
               {t.products.outOfStock}
             </span>
           </div>
         )}
         {isLowStock && !isOutOfStock && (
           <div className="absolute top-2 right-2">
-            <span className="bg-warning text-white px-2 py-0.5 rounded-full text-xs font-medium">
+            <span className="bg-warning text-white px-2 py-0.5 rounded-lg text-xs font-medium">
               {t.products.lowStockAlert}
             </span>
           </div>
@@ -74,16 +74,16 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-semibold text-foreground text-lg mb-1 line-clamp-1 tracking-tight">
+        <h3 className="font-semibold text-foreground text-base mb-1 line-clamp-1 tracking-tight">
           {product.name}
         </h3>
-        <p className="text-sm text-muted-foreground mb-2">
+        <p className="text-xs text-muted-foreground mb-3">
           {product.categoryId?.name || (language === "id" ? "Tanpa Kategori" : "Uncategorized")}
         </p>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xl font-bold text-primary tracking-tight">
+            <p className="text-lg font-bold text-primary tracking-tight">
               {formatCurrency(product.price)}
             </p>
             <p className={cn(
@@ -100,7 +100,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
                 variant="primary"
                 size="sm"
                 onClick={() => onAddToCart(product)}
-                className="rounded-xl w-full"
+                className="rounded-lg w-full"
               >
                 {t.common.add}
               </Button>

@@ -265,80 +265,83 @@ function DashboardContent() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold sm:text-3xl">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1 sm:text-base">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-1 sm:gap-2">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           {tr("Overview of your shop performance", "Ringkasan performa toko Anda")}
         </p>
       </div>
 
       {/* Stat Cards - Responsive Grid */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatCard
           title={tr("Total Products", "Total Produk")}
           value={data.overview.totalProducts}
-          icon={<Package className="h-6 w-6" />}
+          icon={<Package className="h-5 w-5 sm:h-6 sm:w-6" />}
           variant="default"
         />
         <StatCard
           title={t.dashboard.lowStock}
           value={data.overview.lowStockProducts}
-          icon={<AlertTriangle className="h-6 w-6" />}
+          icon={<AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6" />}
           variant="default"
         />
         <StatCard
           title={tr("Today's Revenue", "Pendapatan Hari Ini")}
           value={formatCurrency(data.overview.todayRevenue)}
-          icon={<DollarSign className="h-6 w-6" />}
+          icon={<DollarSign className="h-5 w-5 sm:h-6 sm:w-6" />}
           variant="default"
         />
         <StatCard
           title={tr("Today's Sales", "Penjualan Hari Ini")}
           value={data.overview.todaySalesCount}
-          icon={<ShoppingCart className="h-6 w-6" />}
+          icon={<ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" />}
           variant="default"
         />
         <StatCard
           title={tr("Monthly Revenue", "Pendapatan Bulanan")}
           value={formatCurrency(data.overview.monthRevenue)}
-          icon={<CalendarDays className="h-6 w-6" />}
+          icon={<CalendarDays className="h-5 w-5 sm:h-6 sm:w-6" />}
           variant="default"
         />
       </div>
 
-      <div className="grid gap-4 grid-cols-1 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
+      {/* Charts Row 1 */}
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
               {tr("Last 7 Days Revenue", "Pendapatan 7 Hari Terakhir")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-72 sm:h-80">
+            <div className="h-56 sm:h-64 lg:h-72">
               {chartData && (<Bar data={chartData} options={chartOptions} />)}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{tr("Stock Health", "Kondisi Stok")}</CardTitle>
+            <CardTitle className="text-sm sm:text-base">{tr("Stock Health", "Kondisi Stok")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-72 sm:h-80">
+            <div className="h-56 sm:h-64 lg:h-72">
               {stockHealthData && (<Doughnut data={stockHealthData} options={donutOptions} />)}
             </div>
           </CardContent>
         </Card>
       </div>
 
+      {/* Charts Row 2 */}
       <Card>
         <CardHeader>
-          <CardTitle>{tr("Last 7 Days Sales Trend", "Tren Penjualan 7 Hari Terakhir")}</CardTitle>
+          <CardTitle className="text-sm sm:text-base">{tr("Last 7 Days Sales Trend", "Tren Penjualan 7 Hari Terakhir")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-72 sm:h-80">
+          <div className="h-56 sm:h-64 lg:h-72">
             {salesLineData && (
               <Line
                 data={salesLineData}
@@ -364,17 +367,18 @@ function DashboardContent() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 grid-cols-1 xl:grid-cols-2">
+      {/* Charts Row 3 */}
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="text-sm sm:text-base">
               {tr("Revenue by Category (This Month)", "Pendapatan per Kategori (Bulan Ini)")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
+            <div className="h-56 sm:h-64 lg:h-72">
               {(data.categoryRevenue || []).length === 0 ? (
-                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                <div className="flex items-center justify-center h-full text-muted-foreground text-xs sm:text-sm">
                   {tr("No data yet", "Belum ada data")}
                 </div>
               ) : (
@@ -386,12 +390,12 @@ function DashboardContent() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{tr("Top 5 Products by Sales", "5 Produk Terlaris")}</CardTitle>
+            <CardTitle className="text-sm sm:text-base">{tr("Top 5 Products by Sales", "5 Produk Terlaris")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
+            <div className="h-56 sm:h-64 lg:h-72">
               {(data.topProducts || []).length === 0 ? (
-                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                <div className="flex items-center justify-center h-full text-muted-foreground text-xs sm:text-sm">
                   {tr("No data yet", "Belum ada data")}
                 </div>
               ) : (

@@ -29,7 +29,6 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = () => {
-    // Logic strictly preserved from original
     if (!formData.username.trim() || !formData.password) {
       setError(t.auth.required);
       return false;
@@ -57,7 +56,6 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      // Logic strictly preserved from original
       const response = await authAPI.register({
         fullName: formData.fullName || undefined,
         username: formData.username.trim(),
@@ -91,30 +89,27 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex bg-background">
       {/* Left Panel: Brand & Visuals (Hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary/5 flex-col items-center justify-center p-12">
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2 animate-pulse" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-3xl translate-y-1/2 translate-x-1/2" />
-
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-muted/30 flex-col items-center justify-center p-8 xl:p-12">
         <div className="relative z-10 max-w-md text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary shadow-xl shadow-primary/20 mb-8 animate-bounce-slow">
-            <Package className="h-10 w-10 text-primary-foreground" />
+          <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-primary mb-6 sm:mb-8">
+            <Package className="h-7 w-7 sm:h-8 sm:w-8 text-primary-foreground" />
           </div>
-          <h1 className="text-5xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight mb-3 sm:mb-4 text-foreground">
             {tr("Join Waroeng", "Gabung Waroeng")}
           </h1>
-          <p className="text-xl text-muted-foreground font-medium mb-10 leading-relaxed">
+          <p className="text-sm sm:text-base text-muted-foreground font-medium mb-8 sm:mb-10 leading-relaxed">
             {tr("Empower your business with digital inventory and sales tracking.", "Tingkatkan bisnis Anda dengan pelacakan stok dan penjualan digital.")}
           </p>
 
-          <div className="space-y-4 text-left max-w-xs mx-auto">
+          <div className="space-y-2 sm:space-y-3 text-left max-w-xs mx-auto">
             {[
               { text: tr("Setup your shop in minutes", "Siapkan toko dalam hitungan menit"), icon: "⚡" },
               { text: tr("Automated financial summaries", "Ringkasan keuangan otomatis"), icon: "📈" },
               { text: tr("Cloud-based data backup", "Pencadangan data berbasis cloud"), icon: "☁️" },
             ].map((item, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-primary/5 backdrop-blur-sm">
-                <span className="text-xl">{item.icon}</span>
-                <span className="text-sm font-semibold">{item.text}</span>
+              <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border">
+                <span className="text-lg">{item.icon}</span>
+                <span className="text-sm font-medium">{item.text}</span>
               </div>
             ))}
           </div>
@@ -122,35 +117,35 @@ export default function RegisterPage() {
       </div>
 
       {/* Right Panel: Register Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 overflow-y-auto max-h-screen">
-        <div className="w-full max-w-[440px] py-10">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12 overflow-y-auto max-h-screen">
+        <div className="w-full max-w-[380px] sm:max-w-[400px] py-8 sm:py-10">
           <Link
             href="/login"
-            className="inline-flex items-center text-sm font-semibold text-muted-foreground hover:text-primary transition-colors mb-10 group"
+            className="inline-flex items-center text-sm font-semibold text-muted-foreground hover:text-primary transition-colors mb-6 sm:mb-8 group"
           >
             <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
             {tr("Back to Login", "Kembali ke Login")}
           </Link>
 
-          <div className="mb-10">
-            <h1 className="text-4xl font-bold tracking-tight text-foreground mb-3">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
               {tr("Create Account", "Buat Akun")}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {tr("Start managing your shop today.", "Mulai kelola toko Anda sekarang.")}
             </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-destructive/5 border border-destructive/10 rounded-2xl animate-shake">
-              <p className="text-sm text-destructive flex items-center gap-3 font-medium">
-                <AlertTriangle className="h-5 w-5 shrink-0" />
+            <div className="mb-6 p-3 bg-destructive/5 border border-destructive/20 rounded-lg animate-shake">
+              <p className="text-sm text-destructive flex items-center gap-2 font-medium">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
                 {error}
               </p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div className="relative">
               <Input
                 label={tr("Full Name", "Nama Lengkap")}
@@ -158,9 +153,9 @@ export default function RegisterPage() {
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 disabled={isLoading}
-                className="h-12 pl-11 rounded-xl"
+                className="h-11 pl-10 rounded-lg"
               />
-              <UserCheck className="absolute left-4 top-[38px] h-4 w-4 text-muted-foreground" />
+              <UserCheck className="absolute left-3 top-[34px] h-4 w-4 text-muted-foreground" />
             </div>
 
             <div className="relative">
@@ -170,10 +165,10 @@ export default function RegisterPage() {
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 disabled={isLoading}
-                className="h-12 pl-11 rounded-xl"
+                className="h-11 pl-10 rounded-lg"
                 required
               />
-              <User className="absolute left-4 top-[38px] h-4 w-4 text-muted-foreground" />
+              <User className="absolute left-3 top-[34px] h-4 w-4 text-muted-foreground" />
             </div>
 
             <div className="relative">
@@ -184,9 +179,9 @@ export default function RegisterPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 disabled={isLoading}
-                className="h-12 pl-11 rounded-xl"
+                className="h-11 pl-10 rounded-lg"
               />
-              <Mail className="absolute left-4 top-[38px] h-4 w-4 text-muted-foreground" />
+              <Mail className="absolute left-3 top-[34px] h-4 w-4 text-muted-foreground" />
             </div>
 
             <div className="relative">
@@ -197,14 +192,14 @@ export default function RegisterPage() {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 disabled={isLoading}
-                className="h-12 pl-11 pr-11 rounded-xl"
+                className="h-11 pl-10 pr-10 rounded-lg"
                 required
               />
-              <Lock className="absolute left-4 top-[38px] h-4 w-4 text-muted-foreground" />
+              <Lock className="absolute left-3 top-[34px] h-4 w-4 text-muted-foreground" />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-[38px] text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-3 top-[34px] text-muted-foreground hover:text-foreground transition-colors"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -219,14 +214,14 @@ export default function RegisterPage() {
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 disabled={isLoading}
-                className="h-12 pl-11 pr-11 rounded-xl"
+                className="h-11 pl-10 pr-10 rounded-lg"
                 required
               />
-              <Lock className="absolute left-4 top-[38px] h-4 w-4 text-muted-foreground" />
+              <Lock className="absolute left-3 top-[34px] h-4 w-4 text-muted-foreground" />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-[38px] text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-3 top-[34px] text-muted-foreground hover:text-foreground transition-colors"
                 tabIndex={-1}
               >
                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -235,17 +230,17 @@ export default function RegisterPage() {
 
             <Button
               type="submit"
-              className="w-full h-14 text-lg font-bold rounded-2xl shadow-lg shadow-primary/20 mt-4 active:scale-[0.98] transition-all"
-              size="lg"
+              className="w-full h-11 text-sm font-semibold rounded-lg mt-2 active:scale-[0.98] transition-all"
+              size="md"
               isLoading={isLoading}
             >
               {isLoading ? t.common.loading : tr("Daftar Sekarang", "Create Account")}
             </Button>
           </form>
 
-          <p className="text-sm text-center text-muted-foreground mt-8">
+          <p className="text-sm text-center text-muted-foreground mt-6 sm:mt-8">
             {tr("Already have an account?", "Sudah punya akun?")}{" "}
-            <Link href="/login" className="text-primary hover:underline font-bold transition-all underline-offset-4">
+            <Link href="/login" className="text-primary hover:underline font-semibold transition-all underline-offset-4">
               {t.auth.signIn}
             </Link>
           </p>
@@ -253,13 +248,6 @@ export default function RegisterPage() {
       </div>
 
       <style jsx global>{`
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        .animate-bounce-slow {
-          animation: bounce-slow 4s ease-in-out infinite;
-        }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
           25% { transform: translateX(-5px); }

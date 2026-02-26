@@ -61,7 +61,7 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
       {/* Mobile overlay */}
       <div
         className={cn(
-          "fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300",
+          "fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-200",
           sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
         onClick={() => setSidebarOpen(false)}
@@ -71,7 +71,7 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
       <aside
         className={cn(
           "fixed top-0 left-0 z-50 h-full w-72 bg-card border-r border-border lg:hidden",
-          "transform transition-transform duration-300 ease-in-out",
+          "transform transition-transform duration-200 ease-in-out",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -79,21 +79,21 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
           {/* Mobile Header */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-border">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
-                <Package className="h-5 w-5 text-primary-foreground" />
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Package className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="font-semibold text-lg text-foreground tracking-tight">Waroeng</span>
+              <span className="font-semibold text-base text-foreground tracking-tight">Waroeng</span>
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-2 hover:bg-muted rounded-xl transition-colors"
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -102,14 +102,14 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
+                      ? "bg-primary text-primary-foreground"
                       : "text-foreground hover:bg-muted"
                   )}
                 >
                   <item.icon className="h-5 w-5 shrink-0" />
-                  <span className="font-medium">{item.name}</span>
+                  <span className="font-medium text-sm">{item.name}</span>
                 </Link>
               );
             })}
@@ -120,7 +120,7 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
             <Link
               href="/login"
               className={cn(
-                "flex items-center gap-3 px-3 py-3 rounded-xl text-destructive hover:bg-muted transition-all duration-200"
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-destructive hover:bg-muted transition-all duration-150"
               )}
               onClick={() => {
                 localStorage.removeItem("token");
@@ -129,7 +129,7 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
               }}
             >
               <LogOut className="h-5 w-5 shrink-0" />
-              <span className="font-medium">{t.common.logout}</span>
+              <span className="font-medium text-sm">{t.common.logout}</span>
             </Link>
           </div>
         </div>
@@ -138,23 +138,23 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
       {/* Desktop Sidebar (Collapsed/Expanded) */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-30 h-full bg-card border-r border-border hidden lg:flex transition-all duration-300 ease-in-out",
-          sidebarOpen ? "w-64" : "w-20"
+          "fixed top-0 left-0 z-30 h-full bg-card border-r border-border hidden lg:flex transition-all duration-200 ease-in-out",
+          sidebarOpen ? "w-60" : "w-16"
         )}
       >
         <div className="flex flex-col h-full w-full">
           {/* Logo */}
           <div className="h-16 flex items-center justify-center border-b border-border">
-            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shrink-0">
-              <Package className="h-5 w-5 text-primary-foreground" />
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
+              <Package className="h-4 w-4 text-primary-foreground" />
             </div>
             {sidebarOpen && (
-              <span className="ml-3 font-semibold text-lg text-foreground tracking-tight whitespace-nowrap">Waroeng</span>
+              <span className="ml-3 font-semibold text-base text-foreground tracking-tight whitespace-nowrap">Waroeng</span>
             )}
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -162,17 +162,17 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150",
                     sidebarOpen ? "justify-start" : "justify-center",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
+                      ? "bg-primary text-primary-foreground"
                       : "text-foreground hover:bg-muted"
                   )}
                   title={!sidebarOpen ? item.name : undefined}
                 >
                   <item.icon className="h-5 w-5 shrink-0" />
                   {sidebarOpen && (
-                    <span className="font-medium whitespace-nowrap">{item.name}</span>
+                    <span className="font-medium text-sm whitespace-nowrap">{item.name}</span>
                   )}
                 </Link>
               );
@@ -184,7 +184,7 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
             <Link
               href="/login"
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-destructive hover:bg-muted transition-all duration-200",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-destructive hover:bg-muted transition-all duration-150",
                 sidebarOpen ? "justify-start" : "justify-center"
               )}
               onClick={() => {
@@ -195,7 +195,7 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
               title={!sidebarOpen ? t.common.logout : undefined}
             >
               <LogOut className="h-5 w-5 shrink-0" />
-              {sidebarOpen && <span className="font-medium">{t.common.logout}</span>}
+              {sidebarOpen && <span className="font-medium text-sm">{t.common.logout}</span>}
             </Link>
           </div>
         </div>
