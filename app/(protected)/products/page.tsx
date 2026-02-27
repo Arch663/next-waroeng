@@ -14,7 +14,8 @@ import { useCartStore } from "@/lib/store";
 import { useLanguage } from "@/lib/LanguageContext";
 import { usePageData } from "@/lib/usePageData";
 import { usePageCache } from "@/lib/usePageCache";
-import { Search, Plus, Grid, List, ShoppingCart } from "lucide-react";
+import { useDataRefresh, triggerDataRefresh } from "@/lib/useDataRefresh";
+import { Search, Plus, Grid, List, ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -54,9 +55,12 @@ export default function ProductsPage() {
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const invalidateCache = usePageCache((state) => state.invalidateCache);
 
-  const params: Record<string, unknown> = { page, limit: 20 };
-  if (searchTerm) params.search = searchTerm;
-  if (selectedCategory) params.categoryId = selectedCategory;
+  const params = useMemo(() => {
+    const p: Record<string, unknown> = { page, limit: 20 };
+    if (searchTerm) p.search = searchTerm;
+    if (selectedCategory) p.categoryId = selectedCategory;
+    return p;
+  }, [page, searchTerm, selectedCategory]);
 
   const { data: productsData, isLoading, isRefreshing, refetch } = usePageData<{ products: Product[]; pagination: { total: number } }>({
     key: "products",
@@ -66,6 +70,13 @@ export default function ProductsPage() {
     },
     params,
   });
+
+  // Listen for refresh events and auto-refetch products data
+  useDataRefresh(['products', 'inventory', 'checkout', 'all'], useCallback(() => {
+    invalidateCache("products");
+    refetch(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []));
 
   const products = productsData?.products || [];
   const totalItems = productsData?.pagination?.total || 0;
@@ -132,6 +143,8 @@ export default function ProductsPage() {
       setIsProductModalOpen(false);
       invalidateCache("products");
       refetch(true);
+      // Trigger global refresh for other pages
+      triggerDataRefresh('products');
     } catch (error) {
       console.error("Failed to save product:", error);
     }
@@ -144,6 +157,8 @@ export default function ProductsPage() {
       setDeleteId(null);
       invalidateCache("products");
       refetch(true);
+      // Trigger global refresh for other pages
+      triggerDataRefresh('products');
     } catch (error) {
       console.error("Failed to delete product:", error);
     }
@@ -264,9 +279,39 @@ export default function ProductsPage() {
             ))}
           </div>
         ) : viewMode === "grid" ? (
-          <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {productGrid}
-          </div>
+          <>
+            <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {productGrid}
+            </div>
+            {/* Pagination for Grid View */}
+            {totalItems > 20 && (
+              <div className="px-3 sm:px-4 py-3 border-t border-border flex items-center justify-between gap-3 mt-4">
+                <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                  {tr("Halaman", "Page")} {page} {tr("dari", "of")} {Math.ceil(totalItems / 20)}
+                </p>
+                <div className="flex gap-1.5 sm:gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="h-8 sm:h-9 w-8 sm:w-9 p-0"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(Math.ceil(totalItems / 20), p + 1))}
+                    disabled={page === Math.ceil(totalItems / 20)}
+                    className="h-8 sm:h-9 w-8 sm:w-9 p-0"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <InventoryTable
             items={products as unknown as InventoryItem[]}
@@ -288,108 +333,129 @@ export default function ProductsPage() {
           title={editingProduct ? t.products.editProduct : t.products.addProduct}
           size="lg"
         >
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">{tr("Product Information", "Informasi Produk")}</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <Input
+                    label={t.products.name}
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                  />
+                </div>
                 <Input
-                  label={t.products.name}
-                  value={formData.name}
+                  label={t.products.sku}
+                  value={formData.sku}
                   onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
+                    setFormData({ ...formData, sku: e.target.value })
+                  }
+                  placeholder={tr("Auto-generated if empty", "Otomatis jika kosong")}
+                />
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-foreground mb-1.5">
+                    {t.products.unit}
+                  </label>
+                  <select
+                    value={formData.unit}
+                    onChange={(e) =>
+                      setFormData({ ...formData, unit: e.target.value })
+                    }
+                    className={cn(
+                      "w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground text-sm",
+                      "focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-transparent focus:ring-offset-0",
+                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                      "transition-all duration-150"
+                    )}
+                  >
+                    <option value="pcs">{t.units.pcs}</option>
+                    <option value="box">{t.units.box}</option>
+                    <option value="kg">{t.units.kg}</option>
+                    <option value="liter">{t.units.liter}</option>
+                    <option value="pack">{t.units.pack}</option>
+                    <option value="bottle">{t.units.bottle}</option>
+                    <option value="can">{t.units.can}</option>
+                    <option value="sachet">{t.units.sachet}</option>
+                    <option value="cup">Cup</option>
+                    <option value="tube">Tube</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">{tr("Pricing & Stock", "Harga & Stok")}</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <Input
+                  label={t.products.costPrice}
+                  type="number"
+                  value={formData.costPrice}
+                  onChange={(e) =>
+                    setFormData({ ...formData, costPrice: Math.max(0, parseInt(e.target.value) || 0).toString() })
+                  }
+                />
+                <Input
+                  label={t.products.sellingPrice}
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: Math.max(0, parseInt(e.target.value) || 0).toString() })
                   }
                   required
+                />s
+                <Input
+                  label={t.products.stock}
+                  type="number"
+                  value={formData.stock}
+                  onChange={(e) =>
+                    setFormData({ ...formData, stock: Math.max(0, parseInt(e.target.value) || 0).toString() })
+                  }
                 />
               </div>
-              <Input
-                label={t.products.sku}
-                value={formData.sku}
-                onChange={(e) =>
-                  setFormData({ ...formData, sku: e.target.value })
-                }
-                placeholder={tr("Auto-generated if empty", "Otomatis jika kosong")}
-              />
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">
-                  {t.products.unit}
-                </label>
-                <select
-                  value={formData.unit}
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">{tr("Settings", "Pengaturan")}</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label={t.products.minStock}
+                  type="number"
+                  value={formData.minStock}
                   onChange={(e) =>
-                    setFormData({ ...formData, unit: e.target.value })
+                    setFormData({ ...formData, minStock: Math.max(0, parseInt(e.target.value) || 0).toString() })
                   }
-                  className="w-full px-4 py-2.5 bg-card border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="pcs">{t.units.pcs}</option>
-                  <option value="box">{t.units.box}</option>
-                  <option value="kg">{t.units.kg}</option>
-                  <option value="liter">{t.units.liter}</option>
-                  <option value="pack">{t.units.pack}</option>
-                  <option value="bottle">{t.units.bottle}</option>
-                  <option value="can">{t.units.can}</option>
-                  <option value="sachet">{t.units.sachet}</option>
-                  <option value="cup">Cup</option>
-                </select>
+                />
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-foreground mb-1.5">
+                    {t.products.category}
+                  </label>
+                  <select
+                    value={formData.categoryId}
+                    onChange={(e) =>
+                      setFormData({ ...formData, categoryId: e.target.value })
+                    }
+                    className={cn(
+                      "w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground text-sm",
+                      "focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-transparent focus:ring-offset-0",
+                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                      "transition-all duration-150"
+                    )}
+                    required
+                  >
+                    <option value="">{t.products.selectCategory}</option>
+                    {categories?.map((cat) => (
+                      <option key={cat._id} value={cat._id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <Input
-                label={t.products.costPrice}
-                type="number"
-                step="0.01"
-                value={formData.costPrice}
-                onChange={(e) =>
-                  setFormData({ ...formData, costPrice: e.target.value })
-                }
-              />
-              <Input
-                label={t.products.sellingPrice}
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: e.target.value })
-                }
-                required
-              />
-              <Input
-                label={t.products.stock}
-                type="number"
-                value={formData.stock}
-                onChange={(e) =>
-                  setFormData({ ...formData, stock: e.target.value })
-                }
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label={t.products.minStock}
-                type="number"
-                value={formData.minStock}
-                onChange={(e) =>
-                  setFormData({ ...formData, minStock: e.target.value })
-                }
-              />
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">
-                  {t.products.category}
-                </label>
-                <select
-                  value={formData.categoryId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, categoryId: e.target.value })
-                  }
-                  className="w-full px-4 py-2.5 bg-card border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  required
-                >
-                  <option value="">{t.products.selectCategory}</option>
-                  {categories?.map((cat) => (
-                    <option key={cat._id} value={cat._id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+
             <Input
               label={tr("Image URL (optional)", "URL Gambar (opsional)")}
               value={formData.image}
@@ -397,7 +463,8 @@ export default function ProductsPage() {
                 setFormData({ ...formData, image: e.target.value })
               }
             />
-            <div className="flex gap-2 pt-4">
+
+            <div className="flex gap-2 pt-4 border-t border-border">
               <Button
                 type="button"
                 variant="outline"

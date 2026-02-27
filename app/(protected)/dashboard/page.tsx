@@ -75,7 +75,8 @@ function DashboardContent() {
   // Listen for refresh events and auto-refetch dashboard data
   useDataRefresh(['dashboard', 'checkout', 'reports', 'all'], useCallback(() => {
     refetch(true);
-  }, [refetch]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []));
 
   // Destructure theme colors
   const { c1, c2, c3, c4, c5, border } = theme;

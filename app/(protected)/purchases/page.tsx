@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, Suspense } from "react";
+import React, { useEffect, useState, useCallback, Suspense, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -10,8 +10,11 @@ import { AlertModal } from "@/components/ui/AlertModal";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { purchasesAPI, suppliersAPI, productsAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
+import { usePageData } from "@/lib/usePageData";
+import { useDataRefresh, triggerDataRefresh } from "@/lib/useDataRefresh";
+import { usePageCache } from "@/lib/usePageCache";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Plus, Trash2, Search, ArrowUpDown, ArrowDown, ArrowUp } from "lucide-react";
+import { Plus, Trash2, Search, ArrowUpDown, ArrowDown, ArrowUp, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Purchase {
   _id: string;
@@ -41,19 +44,16 @@ interface PurchaseItem {
 function PurchasesContent() {
   const { t, language } = useLanguage();
   const tr = (en: string, id: string) => (language === "id" ? id : en);
+  const invalidateCache = usePageCache((state) => state.invalidateCache);
 
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const [suppliers, setSuppliers] = useState<{ _id: string; name: string }[]>([]);
-  const [products, setProducts] = useState<{ _id: string; name: string; stock: number }[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [alertState, setAlertState] = useState<{
     open: boolean;
     title: string;
@@ -66,63 +66,99 @@ function PurchasesContent() {
     variant: "info",
   });
 
-  const fetchPurchases = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await purchasesAPI.getAll({
-        page,
-        limit: 10,
-      });
-      const data = response.data.data;
-      let purchasesData = data.purchases || data;
-
-      // Client-side search filter
-      if (searchTerm) {
-        purchasesData = purchasesData.filter((p: Purchase) =>
-          p.supplierName.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+  const toggleExpanded = useCallback((id: string) => {
+    setExpandedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
       }
-
-      // Client-side sort
-      purchasesData.sort((a: Purchase, b: Purchase) => {
-        const dateA = new Date(a.createdAt).getTime();
-        const dateB = new Date(b.createdAt).getTime();
-        return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
-      });
-
-      setPurchases(purchasesData);
-      setTotalPages(data.pagination?.pages || 1);
-    } catch (error) {
-      console.error("Failed to fetch purchases:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, searchTerm, sortOrder]);
-
-  useEffect(() => {
-    fetchPurchases();
-  }, [fetchPurchases]);
-
-  useEffect(() => {
-    const fetchSuppliersAndProducts = async () => {
-      try {
-        const [sRes, pRes] = await Promise.all([
-          suppliersAPI.getAll(),
-          productsAPI.getAll({ limit: 100 }),
-        ]);
-        setSuppliers(sRes.data.data || []);
-        setProducts(pRes.data.data?.products || pRes.data.data || []);
-      } catch (error) {
-        console.error("Failed to load form data:", error);
-      }
-    };
-    fetchSuppliersAndProducts();
+      return next;
+    });
   }, []);
+
+  const { data: purchasesData, isLoading, isRefreshing, refetch: fetchPurchases } = usePageData<{ purchases: Purchase[]; pagination: { pages: number } }>({
+    key: "purchases",
+    fetchFn: async () => {
+      const response = await purchasesAPI.getAll({ page, limit: 10 });
+      return response.data.data;
+    },
+    params: { page, limit: 10 },
+  });
+
+  const { data: suppliersData, refetch: refetchSuppliers } = usePageData<{ _id: string; name: string }[]>({
+    key: "purchases-suppliers",
+    fetchFn: async () => {
+      const response = await suppliersAPI.getAll();
+      return response.data.data || [];
+    },
+  });
+
+  const { data: productsData, refetch: refetchProducts } = usePageData<{ products: { _id: string; name: string; stock: number }[] }>({
+    key: "purchases-products",
+    fetchFn: async () => {
+      const response = await productsAPI.getAll({ limit: 100 });
+      return response.data.data;
+    },
+  });
+
+  // Listen for refresh events and auto-refetch purchases data
+  useDataRefresh(['purchases', 'inventory', 'all'], useCallback(() => {
+    fetchPurchases(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []));
+
+  // Listen for supplier changes to refresh suppliers list in modal
+  useDataRefresh(['suppliers', 'all'], useCallback(() => {
+    invalidateCache("purchases-suppliers");
+    refetchSuppliers(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []));
+
+  // Listen for product/inventory changes to refresh products list in modal
+  useDataRefresh(['products', 'inventory', 'all'], useCallback(() => {
+    // Invalidate cache first to ensure fresh data
+    invalidateCache("purchases-products");
+    refetchProducts(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []));
+
+  const purchases = useMemo(() => {
+    let data = purchasesData?.purchases || [];
+    // Client-side search filter
+    if (searchTerm) {
+      data = data.filter((p: Purchase) =>
+        p.supplierName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    // Client-side sort
+    data.sort((a: Purchase, b: Purchase) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+    });
+    return data;
+  }, [purchasesData, searchTerm, sortOrder]);
+
+  const suppliers = suppliersData || [];
+  const products = productsData?.products || [];
+  const totalPages = purchasesData?.pagination?.pages || 1;
 
   // Reset page when filter changes
   useEffect(() => {
     setPage(1);
   }, [searchTerm, sortOrder]);
+
+  // Fetch fresh suppliers and products when modal opens
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      invalidateCache("purchases-suppliers");
+      invalidateCache("purchases-products");
+      refetchSuppliers(true);
+      refetchProducts(true);
+    }
+  }, [isCreateModalOpen, refetchSuppliers, refetchProducts, invalidateCache]);
 
   const handleAddItem = () => {
     setPurchaseItems([...purchaseItems, { productId: "", quantity: 1, buyPrice: 0 }]);
@@ -182,6 +218,8 @@ function PurchasesContent() {
       setPurchaseItems([]);
       setSelectedSupplier("");
       fetchPurchases();
+      // Trigger refresh for inventory and other pages
+      triggerDataRefresh('purchases');
     } catch (error: unknown) {
       console.error("Purchase error:", error);
       const message =
@@ -212,6 +250,8 @@ function PurchasesContent() {
       await purchasesAPI.delete(deleteId);
       setDeleteId(null);
       fetchPurchases();
+      // Trigger refresh for inventory and other pages
+      triggerDataRefresh('purchases');
     } catch (error) {
       console.error("Failed to delete purchase:", error);
       setAlertState({
@@ -248,7 +288,7 @@ function PurchasesContent() {
 
       {/* Search & Sort Controls */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex-1 min-w-[200px]">
+        <div className="flex-1 min-w-50">
           <Input
             placeholder={tr("Search by supplier name...", "Cari nama supplier...")}
             value={searchTerm}
@@ -281,15 +321,16 @@ function PurchasesContent() {
       </div>
 
       {/* Purchases List */}
-      <Card>
-        <CardContent className="pt-4 sm:pt-6">
-          {isLoading ? (
-            <div className="space-y-3 sm:space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} variant="rectangular" className="h-24 sm:h-28" />
-              ))}
-            </div>
-          ) : purchases.length === 0 ? (
+      <div className={`transition-opacity duration-200 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`}>
+        <Card>
+          <CardContent className="pt-4 sm:pt-6">
+            {isLoading && purchases.length === 0 ? (
+              <div className="space-y-3 sm:space-y-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} variant="rectangular" className="h-24 sm:h-28" />
+                ))}
+              </div>
+            ) : purchases.length === 0 ? (
             <div className="text-center py-10 sm:py-12 text-xs sm:text-sm text-muted-foreground">
               {searchTerm
                 ? tr(`No purchases found for "${searchTerm}"`, `Pembelian "${searchTerm}" tidak ditemukan`)
@@ -297,56 +338,57 @@ function PurchasesContent() {
             </div>
           ) : (
             <div className="space-y-3 sm:space-y-4">
-              {purchases.map((purchase) => (
-                <div
-                  key={purchase._id}
-                  className="p-3 sm:p-4 bg-muted rounded-xl border border-border"
-                >
-                  <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                    <div>
-                      <h3 className="font-semibold text-sm sm:text-base">
-                        {purchase.supplierId?.name || purchase.supplierName}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        {formatDate(purchase.createdAt)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="text-right">
-                        <p className="text-base sm:text-lg font-bold text-primary">
-                          {formatCurrency(purchase.totalAmount)}
-                        </p>
-                        <p className="text-xs sm:text-sm text-muted-foreground">
-                          {purchase.items.length} {tr("items", "item")}
-                        </p>
+              {purchases.map((purchase) => {
+                const isExpanded = expandedItems.has(purchase._id);
+                return (
+                  <div key={purchase._id} className="space-y-3">
+                    <div className="p-3 sm:p-4 bg-muted rounded-xl border border-border flex items-center justify-between hover:bg-muted/60 transition-colors cursor-pointer" onClick={() => toggleExpanded(purchase._id)}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" /> : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />}
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-sm sm:text-base">
+                            {purchase.supplierId?.name || purchase.supplierName}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            {formatDate(purchase.createdAt)} • {purchase.items.length} {tr("items", "item")}
+                          </p>
+                        </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteId(purchase._id)}
-                        className="text-destructive hover:text-destructive h-8 w-8 sm:h-9 sm:w-9 p-0"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="space-y-1.5 sm:space-y-2">
-                    {purchase.items.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between text-xs sm:text-sm"
-                      >
-                        <span className="text-muted-foreground">
-                          {item.productName} × {item.quantity}
-                        </span>
-                        <span className="font-medium">
-                          {formatCurrency(item.subtotal)}
-                        </span>
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="text-right">
+                          <p className="text-base sm:text-lg font-bold text-primary">
+                            {formatCurrency(purchase.totalAmount)}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setDeleteId(purchase._id); }}
+                          className="text-destructive hover:text-destructive h-8 w-8 sm:h-9 sm:w-9 p-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                    ))}
+                    </div>
+                    {isExpanded && (
+                      <div className="ml-4 sm:ml-6 p-3 sm:p-4 bg-muted/40 rounded-xl border border-border space-y-3">
+                        <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-3">{tr("Items Purchased", "Barang Dibeli")}:</p>
+                        <div className="space-y-2.5">
+                          {purchase.items.map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 sm:p-3.5 bg-card rounded-xl border border-border/50">
+                              <div className="min-w-0 flex-1 pr-3">
+                                <p className="font-medium text-foreground text-xs sm:text-sm truncate">{item.productName}</p>
+                                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{item.quantity} x {formatCurrency(item.buyPrice)}</p>
+                              </div>
+                              <p className="font-semibold text-primary text-xs sm:text-sm shrink-0">{formatCurrency(item.subtotal)}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -378,6 +420,7 @@ function PurchasesContent() {
           )}
         </CardContent>
       </Card>
+      </div>
 
       {/* Create Purchase Modal */}
       <Modal
@@ -544,7 +587,7 @@ function PurchaseCardSkeleton() {
             <Skeleton variant="rectangular" className="h-5 sm:h-6 w-20 sm:w-24 ml-auto" />
             <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-12 sm:w-16 ml-auto" />
           </div>
-          <Skeleton variant="rectangular" className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg" />
+          <Skeleton variant="rectangular" className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl" />
         </div>
       </div>
       <div className="space-y-1.5 sm:space-y-2">
@@ -564,13 +607,13 @@ function PurchasesSkeleton({ t }: { t: any }) {
           <Skeleton variant="rectangular" className="h-8 sm:h-10 w-40 sm:w-48" />
           <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-56 sm:w-64" />
         </div>
-        <Skeleton variant="rectangular" className="h-9 sm:h-10 w-32 sm:w-36 rounded-lg" />
+        <Skeleton variant="rectangular" className="h-9 sm:h-10 w-32 sm:w-36 rounded-xl" />
       </div>
 
       {/* Search & Sort Controls */}
       <div className="flex flex-wrap items-center gap-3">
-        <Skeleton variant="rectangular" className="h-9 sm:h-10 flex-1 min-w-[200px] rounded-lg" />
-        <Skeleton variant="rectangular" className="h-9 sm:h-10 w-28 sm:w-32 rounded-lg" />
+        <Skeleton variant="rectangular" className="h-9 sm:h-10 flex-1 min-w-50 rounded-xl" />
+        <Skeleton variant="rectangular" className="h-9 sm:h-10 w-28 sm:w-32 rounded-xl" />
       </div>
 
       {/* Purchases List */}

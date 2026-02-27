@@ -44,7 +44,7 @@ export const LowStockAlert: React.FC = () => {
     };
 
     fetchLowStock();
-    const timer = setInterval(fetchLowStock, 60000);
+    const timer = setInterval(fetchLowStock, 50000);
     return () => clearInterval(timer);
   }, []);
 

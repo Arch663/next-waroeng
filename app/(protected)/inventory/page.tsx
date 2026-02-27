@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState, Suspense } from "react";
+import React, { useCallback, useEffect, useState, Suspense, useMemo } from "react";
 import { InventoryTable, type InventoryItem } from "@/components/ui/InventoryTable";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -12,7 +12,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { productsAPI, reportsAPI, categoriesAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
 import { usePageData } from "@/lib/usePageData";
-import { formatDate } from "@/lib/utils";
+import { useDataRefresh, triggerDataRefresh } from "@/lib/useDataRefresh";
+import { formatDate, cn } from "@/lib/utils";
 
 interface HistoryItem {
   _id: string;
@@ -40,14 +41,18 @@ function InventoryContent() {
     name: "",
     price: "",
     stock: "",
+    unit: "pcs",
     categoryId: "",
   });
 
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const params: Record<string, unknown> = { page, limit: 10 };
-  if (searchTerm) params.search = searchTerm;
-  if (selectedCategory) params.categoryId = selectedCategory;
+  const params = useMemo(() => {
+    const p: Record<string, unknown> = { page, limit: 10 };
+    if (searchTerm) p.search = searchTerm;
+    if (selectedCategory) p.categoryId = selectedCategory;
+    return p;
+  }, [page, searchTerm, selectedCategory]);
 
   const { data: productsData, isLoading, isRefreshing, refetch: refetchProducts } = usePageData<{ products: InventoryItem[]; pagination: { total: number } }>({
     key: "inventory-products",
@@ -57,6 +62,12 @@ function InventoryContent() {
     },
     params,
   });
+
+  // Listen for refresh events and auto-refetch inventory data
+  useDataRefresh(['inventory', 'products', 'purchases', 'all'], useCallback(() => {
+    refetchProducts(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []));
 
   const products = productsData?.products || [];
   const totalItems = productsData?.pagination?.total || 0;
@@ -88,6 +99,7 @@ function InventoryContent() {
         name: product.name,
         price: product.price.toString(),
         stock: product.stock.toString(),
+        unit: (product as any).unit || "pcs",
         categoryId: product.categoryId?._id || "",
       });
     } else {
@@ -96,6 +108,7 @@ function InventoryContent() {
         name: "",
         price: "",
         stock: "0",
+        unit: "pcs",
         categoryId: categories?.[0]?._id || "",
       });
     }
@@ -109,6 +122,7 @@ function InventoryContent() {
         name: formData.name,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock) || 0,
+        unit: formData.unit as 'pcs' | 'box' | 'kg' | 'liter' | 'pack' | 'bottle' | 'can' | 'sachet' | 'cup' | 'tube',
         categoryId: formData.categoryId,
       };
 
@@ -120,6 +134,8 @@ function InventoryContent() {
 
       setIsProductModalOpen(false);
       refetchProducts(true);
+      // Trigger global refresh for other pages
+      triggerDataRefresh('products');
     } catch (error) {
       console.error("Failed to save product:", error);
     }
@@ -131,6 +147,8 @@ function InventoryContent() {
       await productsAPI.delete(deleteId);
       setDeleteId(null);
       refetchProducts(true);
+      // Trigger global refresh for other pages
+      triggerDataRefresh('products');
     } catch (error) {
       console.error("Failed to delete product:", error);
     }
@@ -175,7 +193,7 @@ function InventoryContent() {
                 setSelectedCategory(e.target.value);
                 setPage(1);
               }}
-              className="w-full sm:w-auto px-4 py-2.5 bg-card border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full sm:w-auto px-3 py-2 bg-card border border-input rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring sm:min-w-40"
             >
               <option value="">{tr("All Categories", "Semua Kategori")}</option>
               {categories?.map((cat) => (
@@ -197,6 +215,7 @@ function InventoryContent() {
         page={page}
         onPageChange={setPage}
         hideSearch={true}
+        showUnit={true}
       />
 
       <Card>
@@ -280,22 +299,67 @@ function InventoryContent() {
         title={editingProduct ? t.products.editProduct : t.products.addProduct}
         size="sm"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label={t.products.name} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
-          <div className="grid grid-cols-2 gap-4">
-            <Input label={tr("Price", "Harga")} type="number" step="0.01" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
-            <Input label={t.products.stock} type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-3">{tr("Product Information", "Informasi Produk")}</h3>
+            <Input label={t.products.name} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1.5">{t.products.category}</label>
-            <select value={formData.categoryId} onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })} className="w-full px-4 py-2.5 bg-card border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring" required>
-              <option value="">{t.products.selectCategory}</option>
-              {categories?.map((cat) => (
-                <option key={cat._id} value={cat._id}>{cat.name}</option>
-              ))}
-            </select>
+            <h3 className="text-sm font-semibold text-foreground mb-3">{tr("Pricing & Stock", "Harga & Stok")}</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <Input label={tr("Price", "Harga")} type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: Math.max(0, parseInt(e.target.value) || 0).toString() })} required />
+              <Input label={t.products.stock} type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: Math.max(0, parseInt(e.target.value) || 0).toString() })} />
+            </div>
           </div>
-          <div className="flex gap-2 pt-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-3">{tr("Details", "Detail")}</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1.5">{t.products.unit}</label>
+                <select
+                  value={formData.unit}
+                  onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                  className={cn(
+                    "w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground text-sm",
+                    "focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-transparent focus:ring-offset-0",
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    "transition-all duration-150"
+                  )}
+                >
+                  <option value="pcs">{t.units.pcs}</option>
+                  <option value="box">{t.units.box}</option>
+                  <option value="kg">{t.units.kg}</option>
+                  <option value="liter">{t.units.liter}</option>
+                  <option value="pack">{t.units.pack}</option>
+                  <option value="bottle">{t.units.bottle}</option>
+                  <option value="can">{t.units.can}</option>
+                  <option value="sachet">{t.units.sachet}</option>
+                  <option value="cup">Cup</option>
+                  <option value="tube">Tube</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-foreground mb-1.5">{t.products.category}</label>
+                <select
+                  value={formData.categoryId}
+                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                  className={cn(
+                    "w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground text-sm",
+                    "focus:outline-none focus:ring-2 focus:ring-ring/40 focus:border-transparent focus:ring-offset-0",
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    "transition-all duration-150"
+                  )}
+                  required
+                >
+                  <option value="">{t.products.selectCategory}</option>
+                  {categories?.map((cat) => (
+                    <option key={cat._id} value={cat._id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2 pt-4 border-t border-border">
             <Button type="button" variant="outline" className="flex-1" onClick={() => setIsProductModalOpen(false)}>{t.common.cancel}</Button>
             <Button type="submit" className="flex-1">{editingProduct ? t.common.edit : t.common.add}</Button>
           </div>
@@ -330,7 +394,7 @@ function InventorySkeleton({ tr, t }: { tr: any; t: any }) {
       <Card>
         <CardContent className="pt-4 sm:pt-6">
           <div className="flex items-center gap-3 flex-wrap">
-            <Skeleton variant="rectangular" className="h-9 sm:h-10 flex-1 min-w-[200px] rounded-lg" />
+            <Skeleton variant="rectangular" className="h-9 sm:h-10 flex-1 min-w-50 rounded-lg" />
             <Skeleton variant="rectangular" className="h-9 sm:h-10 w-full sm:w-48 rounded-lg" />
           </div>
         </CardContent>

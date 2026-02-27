@@ -11,6 +11,7 @@ import { AlertModal } from "@/components/ui/AlertModal";
 import { suppliersAPI, purchasesAPI, productsAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
 import { usePageData } from "@/lib/usePageData";
+import { useDataRefresh, triggerDataRefresh } from "@/lib/useDataRefresh";
 import { formatCurrency } from "@/lib/utils";
 import { Plus, ArrowUpDown, Search, Phone, MapPin, Truck } from "lucide-react";
 
@@ -45,6 +46,12 @@ function SuppliersContent() {
       return response.data.data || [];
     },
   });
+
+  // Listen for refresh events and auto-refetch suppliers data
+  useDataRefresh(['suppliers', 'purchases', 'all'], useCallback(() => {
+    refetchSuppliers(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []));
 
   const { data: productsData } = usePageData<Product[]>({
     key: "suppliers-products",
@@ -119,6 +126,8 @@ function SuppliersContent() {
       }
       setIsSupplierModalOpen(false);
       refetchSuppliers(true);
+      // Trigger global refresh for other pages
+      triggerDataRefresh('suppliers');
     } catch (error) {
       console.error("Failed to save supplier:", error);
     }
@@ -130,6 +139,8 @@ function SuppliersContent() {
       await suppliersAPI.delete(deleteId);
       setDeleteId(null);
       refetchSuppliers(true);
+      // Trigger global refresh for other pages
+      triggerDataRefresh('suppliers');
     } catch (error) {
       console.error("Failed to delete supplier:", error);
     }

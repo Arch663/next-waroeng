@@ -90,7 +90,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
               "text-xs font-medium",
               isOutOfStock ? "text-destructive" : isLowStock ? "text-warning" : "text-success"
             )}>
-              {isOutOfStock ? t.products.outOfStock : `${t.products.stock}: ${product.stock}`}
+              {isOutOfStock ? t.products.outOfStock : `${t.products.stock}: ${product.stock} ${product.unit}`}
             </p>
           </div>
 

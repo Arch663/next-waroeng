@@ -45,7 +45,7 @@ const productSchema = new mongoose.Schema<IProduct>({
   },
   unit: {
     type: String,
-    enum: ['pcs', 'box', 'kg', 'liter', 'pack', 'bottle', 'can', 'sachet', 'cup'],
+    enum: ['pcs', 'box', 'kg', 'liter', 'pack', 'bottle', 'can', 'sachet', 'cup', 'tube'],
     default: 'pcs',
   },
   categoryId: {

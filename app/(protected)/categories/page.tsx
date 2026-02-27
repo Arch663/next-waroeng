@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { categoriesAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
 import { usePageData } from "@/lib/usePageData";
+import { useDataRefresh, triggerDataRefresh } from "@/lib/useDataRefresh";
 import { Pencil, Plus, Tags, Trash2 } from "lucide-react";
 
 interface Category {
@@ -38,13 +39,19 @@ function CategoriesContent() {
     variant: "info",
   });
 
-  const { data: categories, isLoading, refetch } = usePageData<Category[]>({
+  const { data: categories, isLoading, isRefreshing, refetch } = usePageData<Category[]>({
     key: "categories",
     fetchFn: async () => {
       const res = await categoriesAPI.getAll();
       return res.data?.data || [];
     },
   });
+
+  // Listen for refresh events and auto-refetch categories data
+  useDataRefresh(['categories', 'products', 'inventory', 'all'], useCallback(() => {
+    refetch(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []));
 
   const openCreate = () => {
     setEditingCategory(null);
@@ -70,6 +77,8 @@ function CategoriesContent() {
       setIsModalOpen(false);
       setName("");
       refetch(true);
+      // Trigger global refresh for other pages
+      triggerDataRefresh('categories');
       setAlert({
         open: true,
         title: t.common.success,
@@ -101,6 +110,8 @@ function CategoriesContent() {
       await categoriesAPI.delete(deleteId);
       setDeleteId(null);
       refetch(true);
+      // Trigger global refresh for other pages
+      triggerDataRefresh('categories');
       setAlert({
         open: true,
         title: t.common.success,
@@ -157,7 +168,7 @@ function CategoriesContent() {
   }
 
   return (
-    <div className={`space-y-4 sm:space-y-6 transition-opacity duration-200 ${isLoading ? 'opacity-60' : 'opacity-100'}`}>
+    <div className={`space-y-4 sm:space-y-6 transition-opacity duration-200 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`}>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{tr("Categories", "Kategori")}</h1>

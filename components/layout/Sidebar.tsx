@@ -37,8 +37,8 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
         { name: language === "id" ? "Pengguna" : "Users", href: "/users", icon: ShieldCheck },
         { name: language === "id" ? "Kategori" : "Categories", href: "/categories", icon: Tags },
         { name: t.inventory.title, href: "/inventory", icon: ClipboardList },
-        { name: t.purchases.title, href: "/purchases", icon: FileText },
         { name: t.suppliers.title, href: "/suppliers", icon: Users },
+        { name: t.purchases.title, href: "/purchases", icon: FileText },
         { name: t.reports.title, href: "/reports", icon: FileText },
       );
     }

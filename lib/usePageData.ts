@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { usePageCache } from "./usePageCache";
 import { useNavigationStore } from "./useNavigationStore";
 
@@ -63,6 +63,9 @@ export function usePageData<T>({
     return isFirstVisit(key);
   });
 
+  // Track which cacheKey we already initiated a fetch for, to prevent infinite loops
+  const fetchedForCacheKey = useRef<string | null>(null);
+
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -77,7 +80,7 @@ export function usePageData<T>({
       if (cached && !forceRefresh) {
         setData(cached);
         setIsLoading(false);
-        return;
+        // Do not return here: continue to fetch fresh data in background (SWR pattern)
       }
 
       // Refreshing vs Loading state
@@ -124,20 +127,19 @@ export function usePageData<T>({
   useEffect(() => {
     if (!enabled) return;
 
+    // Prevent infinite loops when fetchFn or data changes
+    if (fetchedForCacheKey.current === cacheKey) {
+      return;
+    }
+    fetchedForCacheKey.current = cacheKey;
+
     // If we already have data (from initialData or sync cache check),
-    // we still might want to trigger a background refresh or just mark as visited
+    // mark as visited. Always trigger a background refresh to ensure fresh data.
     if (data) {
       markAsVisited(key);
-      // Optional: triggger background refresh even if cached?
-      // For now, let's stick to the current behavior: only fetch if no cache
-      const cached = getCache<T>(cacheKey);
-      if (!cached) {
-        fetchData(false);
-      }
-    } else {
-      fetchData(false);
     }
-  }, [cacheKey, fetchData, enabled, key, markAsVisited, data, getCache]);
+    fetchData(false);
+  }, [cacheKey, fetchData, enabled, key, markAsVisited, data]);
 
   const invalidate = useCallback(() => {
     invalidateCache(cacheKey);

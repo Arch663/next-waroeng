@@ -46,6 +46,7 @@ interface InventoryTableProps {
   onSearch?: (search: string) => void;
   showActions?: boolean;
   hideSearch?: boolean;
+  showUnit?: boolean;
 }
 
 export const InventoryTable: React.FC<InventoryTableProps> = React.memo(
@@ -60,12 +61,13 @@ export const InventoryTable: React.FC<InventoryTableProps> = React.memo(
     onSearch,
     showActions = true,
     hideSearch = false,
+    showUnit = false,
   }) => {
     const { language, t } = useLanguage();
     const [searchTerm, setSearchTerm] = useState("");
     const [sortField, setSortField] = useState<SortField | null>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>(null);
-    const itemsPerPage = 10;
+    const itemsPerPage = 20;
 
     const totalPages = useMemo(
       () => Math.ceil((totalItems || items.length) / itemsPerPage),
@@ -179,6 +181,11 @@ export const InventoryTable: React.FC<InventoryTableProps> = React.memo(
                     {renderSortIcon("price")}
                   </button>
                 </th>
+                {showUnit && (
+                  <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-medium text-foreground">
+                    {language === "id" ? "Satuan" : "Unit"}
+                  </th>
+                )}
                 <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-center text-xs sm:text-sm font-medium text-foreground">
                   <button onClick={() => handleSort("stock")} className="flex items-center justify-center w-full hover:text-foreground transition-colors">
                     {t.products.stock}
@@ -209,7 +216,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = React.memo(
                 ))
               ) : sortedItems.length === 0 ? (
                 <tr>
-                  <td colSpan={showActions ? 6 : 5} className="px-3 sm:px-4 py-10 sm:py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={showActions ? (showUnit ? 7 : 6) : (showUnit ? 6 : 5)} className="px-3 sm:px-4 py-10 sm:py-12 text-center text-sm text-muted-foreground">
                     {language === "id" ? "Produk tidak ditemukan" : "No products found"}
                   </td>
                 </tr>
@@ -220,6 +227,9 @@ export const InventoryTable: React.FC<InventoryTableProps> = React.memo(
                     <td className="px-3 sm:px-4 py-3"><span className="text-xs sm:text-sm text-muted-foreground">{item.sku || "-"}</span></td>
                     <td className="px-3 sm:px-4 py-3"><span className="text-xs sm:text-sm text-muted-foreground">{item.categoryId?.name || "-"}</span></td>
                     <td className="px-3 sm:px-4 py-3 text-right"><span className="font-medium text-sm sm:text-base text-primary">{formatCurrency(item.price)}</span></td>
+                    {showUnit && (
+                      <td className="px-3 sm:px-4 py-3 text-center"><span className="text-xs sm:text-sm text-muted-foreground">{item.unit || "-"}</span></td>
+                    )}
                     <td className="px-3 sm:px-4 py-3 text-center">
                       <span className={cn("px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium", item.stock === 0 ? "bg-destructive/10 text-destructive" : item.stock < 10 ? "bg-warning/10 text-warning" : "bg-success/10 text-success")}>
                         {item.stock}
@@ -249,15 +259,27 @@ export const InventoryTable: React.FC<InventoryTableProps> = React.memo(
         </div>
 
         {totalPages > 1 && (
-          <div className="px-3 sm:px-4 py-3 border-t border-border flex items-center justify-between gap-3">
+          <div className="px-3 sm:px-4 py-3 flex items-center justify-between gap-3">
             <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
               {language === "id" ? "Halaman" : "Page"} {page} {language === "id" ? "dari" : "of"} {totalPages}
             </p>
             <div className="flex gap-1.5 sm:gap-2">
-              <Button variant="outline" size="sm" onClick={() => onPageChange?.(page - 1)} disabled={page === 1} className="h-8 sm:h-9 w-8 sm:w-9 p-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange?.(page - 1)}
+                disabled={page === 1}
+                className="h-8 sm:h-9 w-8 sm:w-9 p-0"
+              >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => onPageChange?.(page + 1)} disabled={page === totalPages} className="h-8 sm:h-9 w-8 sm:w-9 p-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange?.(page + 1)}
+                disabled={page === totalPages}
+                className="h-8 sm:h-9 w-8 sm:w-9 p-0"
+              >
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>

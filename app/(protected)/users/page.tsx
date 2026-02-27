@@ -8,6 +8,7 @@ import { usersAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useAuthStore } from "@/lib/store";
 import { usePageData } from "@/lib/usePageData";
+import { useDataRefresh, triggerDataRefresh } from "@/lib/useDataRefresh";
 import { Users, ShieldCheck, RefreshCw } from "lucide-react";
 
 type UserRole = "admin" | "manager" | "cashier";
@@ -33,6 +34,12 @@ function UsersContent() {
       return response.data?.data || [];
     },
   });
+
+  // Listen for refresh events and auto-refetch users data
+  useDataRefresh(['users', 'all'], useCallback(() => {
+    fetchUsers(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []));
 
   const items = usersData || [];
   const [isSavingId, setIsSavingId] = useState<string | null>(null);
@@ -67,6 +74,8 @@ function UsersContent() {
     try {
       await usersAPI.updateRole(target._id, nextRole);
       fetchUsers(true);
+      // Trigger global refresh for other pages
+      triggerDataRefresh('users');
     } catch (err) {
       console.error("Failed to update role:", err);
       setError(tr("Failed to update role", "Gagal memperbarui role"));
