@@ -162,3 +162,14 @@ export const usersAPI = {
   updateRole: (id: string, role: "admin" | "manager" | "cashier") =>
     api.patch(`/users/${id}/role`, { role }),
 };
+
+// Store Balance API
+export const storeAPI = {
+  getBalance: () => api.get("/store/balance"),
+  getHistory: (params?: { page?: number; limit?: number; type?: string }) =>
+    api.get("/store/balance/history", { params }),
+  deposit: (data: { amount: number; description?: string }) =>
+    api.post("/store/balance/deposit", data),
+  withdraw: (data: { amount: number; description?: string }) =>
+    api.post("/store/balance/withdraw", data),
+};

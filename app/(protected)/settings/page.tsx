@@ -33,14 +33,16 @@ export default function SettingsPage() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{t.settings.title}</h1>
-        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-          {tr(
-            "Manage application appearance and your account preferences",
-            "Kelola tampilan aplikasi dan preferensi akun Anda"
-          )}
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{t.settings.title}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            {tr(
+              "Manage application appearance and your account preferences",
+              "Kelola tampilan aplikasi dan preferensi akun Anda"
+            )}
+          </p>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">

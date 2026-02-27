@@ -188,7 +188,7 @@ function SuppliersContent() {
   const isRefreshing = isRefreshingSuppliers;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className={`space-y-4 sm:space-y-6 transition-opacity duration-200 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`}>
       {/* Page Header - Never blurs during refresh */}
       <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
         <div>

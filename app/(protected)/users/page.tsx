@@ -89,20 +89,20 @@ function UsersContent() {
   }
 
   return (
-    <div className={`space-y-4 sm:space-y-6 transition-all duration-300 ${isRefreshing ? 'opacity-60 grayscale-[0.2]' : 'opacity-100'}`}>
-      <div className="flex items-start justify-between gap-3">
+    <div className={`space-y-4 sm:space-y-6 transition-opacity duration-200 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`}>
+      <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">
             {tr("Users & Roles", "Pengguna & Role")}
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             {tr(
               "Manage account access and update user roles",
               "Kelola akses akun dan perbarui role pengguna"
             )}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => fetchUsers(false)} disabled={isRefreshing} className="shadow-sm h-8 sm:h-9 sm:h-10">
+        <Button variant="outline" size="sm" onClick={() => fetchUsers(false)} disabled={isRefreshing} className="shadow-sm h-9 sm:h-10">
           <RefreshCw className={`h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
           <span className="hidden sm:inline">{tr("Refresh", "Segarkan")}</span>
           <span className="sm:hidden">{tr("Refresh", "Segarkan")}</span>

@@ -43,7 +43,7 @@ interface PurchaseItem {
 
 function PurchasesContent() {
   const { t, language } = useLanguage();
-  const tr = (en: string, id: string) => (language === "id" ? id : en);
+  const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
   const invalidateCache = usePageCache((state) => state.invalidateCache);
 
   const [page, setPage] = useState(1);
@@ -270,8 +270,13 @@ function PurchasesContent() {
 
   const hasValidItems = purchaseItems.some((item) => item.productId);
 
+  // Show skeleton on initial load
+  if (isLoading && !purchasesData) {
+    return <PurchasesSkeleton />;
+  }
+
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className={`space-y-4 sm:space-y-6 transition-opacity duration-200 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`}>
       <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{t.purchases.title}</h1>
@@ -321,9 +326,8 @@ function PurchasesContent() {
       </div>
 
       {/* Purchases List */}
-      <div className={`transition-opacity duration-200 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`}>
-        <Card>
-          <CardContent className="pt-4 sm:pt-6">
+      <Card>
+        <CardContent className="pt-4 sm:pt-6">
             {isLoading && purchases.length === 0 ? (
               <div className="space-y-3 sm:space-y-4">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -420,7 +424,6 @@ function PurchasesContent() {
           )}
         </CardContent>
       </Card>
-      </div>
 
       {/* Create Purchase Modal */}
       <Modal
@@ -598,7 +601,7 @@ function PurchaseCardSkeleton() {
   );
 }
 
-function PurchasesSkeleton({ t }: { t: any }) {
+function PurchasesSkeleton() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
@@ -631,9 +634,8 @@ function PurchasesSkeleton({ t }: { t: any }) {
 }
 
 export default function PurchasesPage() {
-  const { t } = useLanguage();
   return (
-    <Suspense fallback={<PurchasesSkeleton t={t} />}>
+    <Suspense fallback={<PurchasesSkeleton />}>
       <PurchasesContent />
     </Suspense>
   );

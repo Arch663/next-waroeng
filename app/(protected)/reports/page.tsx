@@ -387,7 +387,7 @@ function ReportsContent() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Page Header - Never blurs during refresh */}
-      <div className="flex flex-col gap-3 sm:gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{t.reports.title}</h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">{tr("Financial and performance analytics", "Analitik keuangan dan performa")}</p>
@@ -402,7 +402,7 @@ function ReportsContent() {
             <span className="text-xs text-muted-foreground font-medium hidden sm:inline">{tr("To", "Ke")}:</span>
             <Input type="date" value={dateRange.endDate} onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })} className="w-full sm:w-36 h-9 sm:h-10 text-xs sm:text-sm" />
           </div>
-          <Button variant="outline" onClick={handlePrint} className="flex items-center gap-1.5 sm:gap-2 ml-auto shadow-sm h-9 sm:h-10">
+          <Button variant="outline" onClick={handlePrint} className="flex items-center gap-1.5 sm:gap-2 shadow-sm h-9 sm:h-10">
             <Printer className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="hidden sm:inline">{tr("Export PDF", "Ekspor PDF")}</span>
             <span className="sm:hidden">PDF</span>
@@ -431,7 +431,7 @@ function ReportsContent() {
       </div>
 
       {/* Content - Blurs during refresh */}
-      <div className={`space-y-6 transition-opacity duration-300 ${isRefreshing ? 'opacity-60 blur-[1px]' : 'opacity-100'}`}>
+      <div className={`space-y-4 sm:space-y-6 transition-opacity duration-200 ${isRefreshing ? 'opacity-60' : 'opacity-100'}`}>
         {activeTab === "overview" && renderOverview()}
         {activeTab === "sales" && renderSales()}
         {activeTab === "purchases" && (

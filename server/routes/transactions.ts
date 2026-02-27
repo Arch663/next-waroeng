@@ -4,6 +4,8 @@ import { body } from 'express-validator';
 import { Transaction } from '../models/Transaction';
 import { Product } from '../models/Product';
 import { History } from '../models/History';
+import { StoreBalance } from '../models/StoreBalance';
+import { BalanceTransaction } from '../models/BalanceTransaction';
 import { protect, AuthRequest } from '../middleware/auth';
 import { validateRequest } from '../utils/validator';
 
@@ -104,10 +106,36 @@ router.post(
         }
       }
 
+      // Update store balance with sale amount
+      let storeBalance = await StoreBalance.findOne().sort({ createdAt: -1 });
+      if (!storeBalance) {
+        storeBalance = await StoreBalance.create({ balance: 0 });
+      }
+
+      const balanceBefore = storeBalance.balance;
+      const balanceAfter = balanceBefore + totalAmount;
+
+      storeBalance.balance = balanceAfter;
+      storeBalance.lastUpdated = new Date();
+      await storeBalance.save();
+
+      await BalanceTransaction.create({
+        type: 'sale',
+        amount: totalAmount,
+        balanceBefore,
+        balanceAfter,
+        description: `Sale transaction`,
+        referenceId: transaction._id,
+        referenceType: 'transaction',
+      });
+
       res.status(201).json({
         success: true,
         message: 'Transaction completed successfully',
-        data: transaction,
+        data: {
+          transaction,
+          balance: balanceAfter,
+        },
       });
     } catch (error) {
       console.error('Transaction error:', error);

@@ -6,6 +6,8 @@ import { Product } from './models/Product';
 import { Supplier } from './models/Supplier';
 import { Purchase } from './models/Purchase';
 import { Transaction } from './models/Transaction';
+import { StoreBalance } from './models/StoreBalance';
+import { BalanceTransaction } from './models/BalanceTransaction';
 
 dotenv.config();
 
@@ -52,6 +54,8 @@ const seedDatabase = async () => {
       Supplier.deleteMany({}),
       Purchase.deleteMany({}),
       Transaction.deleteMany({}),
+      StoreBalance.deleteMany({}),
+      BalanceTransaction.deleteMany({}),
     ]);
     console.log('🗑️  Cleared existing data');
 
@@ -64,6 +68,18 @@ const seedDatabase = async () => {
       fullName: 'Administrator',
     });
     console.log('👤 Created admin user (username: admin, password: admin123)');
+
+    // Create initial store balance
+    await StoreBalance.create({ balance: 5000000 }); // Initial balance of 5,000,000
+    await BalanceTransaction.create({
+      type: 'deposit',
+      amount: 5000000,
+      balanceBefore: 0,
+      balanceAfter: 5000000,
+      description: 'Initial balance',
+      referenceType: 'manual',
+    });
+    console.log('💰 Created initial store balance (Rp 5,000,000)');
 
     // Create categories
     const categories = await Category.insertMany([

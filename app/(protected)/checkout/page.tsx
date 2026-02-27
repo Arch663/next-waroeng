@@ -33,7 +33,8 @@ function CheckoutContent() {
     const { triggerRefresh } = useDataRefresher();
 
     const [searchTerm, setSearchTerm] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
     const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
     const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
     const [isClearCartModalOpen, setIsClearCartModalOpen] = useState(false);
@@ -93,6 +94,7 @@ function CheckoutContent() {
     }, [searchTerm]);
 
     useEffect(() => {
+        setIsMounted(true);
         fetchProducts();
     }, [fetchProducts]);
 
@@ -144,12 +146,12 @@ function CheckoutContent() {
     const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
-        <div className="space-y-4 sm:space-y-6">
+        <div className={`space-y-4 sm:space-y-6 transition-opacity duration-200 ${isMounted && isLoading ? 'opacity-60' : 'opacity-100'}`}>
             {/* Page Header */}
-            <div className="flex items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
                 <div>
-                    <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">{t.cashier.checkout}</h1>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{t.cashier.checkout}</h1>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                         {tr("Process sales and manage cart", "Proses penjualan dan kelola keranjang")}
                     </p>
                 </div>

@@ -18,6 +18,7 @@ import {
   X,
   Settings,
   ShieldCheck,
+  DollarSign,
 } from "lucide-react";
 
 export const Sidebar: React.FC = React.memo(function Sidebar() {
@@ -42,6 +43,7 @@ export const Sidebar: React.FC = React.memo(function Sidebar() {
         { name: t.reports.title, href: "/reports", icon: FileText },
       );
     }
+    baseNav.push({ name: language === "id" ? "Saldo Toko" : "Store Balance", href: "/balance", icon: DollarSign });
     baseNav.push({ name: t.products.title, href: "/products", icon: Package });
     baseNav.push({ name: t.cashier.title, href: "/checkout", icon: ShoppingCart });
     baseNav.push({ name: t.common.settings, href: "/settings", icon: Settings })

@@ -4,7 +4,7 @@ import React, { useCallback, Suspense, useMemo } from "react";
 import { StatCard } from "@/components/ui/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Skeleton, SkeletonCard } from "@/components/ui/Skeleton";
-import { reportsAPI } from "@/lib/api";
+import { reportsAPI, storeAPI } from "@/lib/api";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useChartTheme } from "@/lib/useChartTheme";
 import { formatCurrency } from "@/lib/utils";
@@ -59,6 +59,10 @@ interface DashboardData {
   categoryRevenue: { _id: string; categoryName: string; revenue: number }[];
 }
 
+interface BalanceData {
+  balance: number;
+}
+
 function DashboardContent() {
   const { t, language } = useLanguage();
   const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
@@ -69,6 +73,14 @@ function DashboardContent() {
     fetchFn: async () => {
       const response = await reportsAPI.getDashboard();
       return response.data.data as DashboardData;
+    },
+  });
+
+  const { data: balanceData } = usePageData<BalanceData>({
+    key: "store-balance",
+    fetchFn: async () => {
+      const response = await storeAPI.getBalance();
+      return response.data.data as BalanceData;
     },
   });
 
@@ -260,15 +272,23 @@ function DashboardContent() {
   return (
     <div className={`space-y-4 sm:space-y-6 transition-opacity duration-200 ${isRefreshingUI ? 'opacity-60' : 'opacity-100'}`}>
       {/* Page Header */}
-      <div className="flex flex-col gap-1 sm:gap-2">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          {tr("Overview of your shop performance", "Ringkasan performa toko Anda")}
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">Dashboard</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            {tr("Overview of your shop performance", "Ringkasan performa toko Anda")}
+          </p>
+        </div>
       </div>
 
       {/* Stat Cards - Responsive Grid */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <StatCard
+          title={tr("Store Balance", "Saldo Toko")}
+          value={formatCurrency(balanceData?.balance || 0)}
+          icon={<DollarSign className="h-5 w-5 sm:h-6 sm:w-6" />}
+          variant="default"
+        />
         <StatCard
           title={tr("Total Products", "Total Produk")}
           value={data.overview.totalProducts}
@@ -412,8 +432,8 @@ function DashboardSkeleton() {
       </div>
 
       {/* Responsive Stat Cards Skeleton */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {Array.from({ length: 5 }).map((_, i) => (
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="p-4 sm:p-6 bg-card rounded-2xl border border-border space-y-2 sm:space-y-3">
             <div className="flex items-center justify-between">
               <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-20 sm:w-24" />

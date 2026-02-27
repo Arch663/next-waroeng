@@ -155,7 +155,7 @@ function InventoryContent() {
   };
 
   if (isLoading && !productsData) {
-    return <InventorySkeleton tr={tr} t={t} />;
+    return <InventorySkeleton />;
   }
 
   return (
@@ -378,7 +378,7 @@ function InventoryContent() {
   );
 }
 
-function InventorySkeleton({ tr, t }: { tr: any; t: any }) {
+function InventorySkeleton() {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
@@ -427,10 +427,8 @@ function InventorySkeleton({ tr, t }: { tr: any; t: any }) {
 }
 
 export default function InventoryPage() {
-  const { t, language } = useLanguage();
-  const tr = (en: string, id: string) => (language === "id" ? id : en);
   return (
-    <Suspense fallback={<InventorySkeleton tr={tr} t={t} />}>
+    <Suspense fallback={<InventorySkeleton />}>
       <InventoryContent />
     </Suspense>
   );

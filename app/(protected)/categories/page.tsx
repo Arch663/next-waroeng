@@ -136,35 +136,7 @@ function CategoriesContent() {
   };
 
   if (isLoading && (!categories || categories.length === 0)) {
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{tr("Categories", "Kategori")}</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              {tr("Manage product categories", "Kelola kategori produk")}
-            </p>
-          </div>
-          <Skeleton variant="rectangular" className="h-9 sm:h-10 w-28 sm:w-32 rounded-lg" />
-        </div>
-
-        <Card>
-          <CardHeader className="py-3 sm:py-4">
-            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-              <Tags className="h-4 w-4 sm:h-5 sm:w-5" />
-              <Skeleton variant="rectangular" className="h-5 sm:h-6 w-28 sm:w-32" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4">
-            <div className="space-y-2.5 sm:space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} variant="rectangular" className="h-12 sm:h-14" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <CategoriesSkeleton />;
   }
 
   return (
@@ -276,33 +248,37 @@ export default function CategoriesPage() {
   const tr = (en: string, id: string) => (language === "id" ? id : en);
 
   return (
-    <Suspense fallback={
-      <div className="space-y-4 sm:space-y-6">
-        {/* Page Header */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="space-y-2">
-            <Skeleton variant="rectangular" className="h-8 sm:h-10 w-40 sm:w-48" />
-            <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-56 sm:w-64" />
-          </div>
-          <Skeleton variant="rectangular" className="h-9 sm:h-10 w-32 sm:w-36 rounded-lg" />
-        </div>
-        {/* Card */}
-        <Card>
-          <CardHeader className="py-3 sm:py-4">
-            <Skeleton variant="rectangular" className="h-5 sm:h-6 w-28 sm:w-32" />
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4">
-            <div className="space-y-2.5 sm:space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} variant="rectangular" className="h-12 sm:h-14 rounded-xl" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    }>
+    <Suspense fallback={<CategoriesSkeleton />}>
       <CategoriesContent />
     </Suspense>
+  );
+}
+
+function CategoriesSkeleton() {
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="space-y-2">
+          <Skeleton variant="rectangular" className="h-8 sm:h-10 w-40 sm:w-48" />
+          <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-56 sm:w-64" />
+        </div>
+        <Skeleton variant="rectangular" className="h-9 sm:h-10 w-32 sm:w-36 rounded-lg" />
+      </div>
+      {/* Card */}
+      <Card>
+        <CardHeader className="py-3 sm:py-4">
+          <Skeleton variant="rectangular" className="h-5 sm:h-6 w-28 sm:w-32" />
+        </CardHeader>
+        <CardContent className="p-3 sm:p-4">
+          <div className="space-y-2.5 sm:space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} variant="rectangular" className="h-12 sm:h-14 rounded-xl" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

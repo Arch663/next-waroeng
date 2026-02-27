@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState, Suspense } from "react";
 import { ProductCard, type Product } from "@/components/ui/ProductCard";
 import { InventoryTable, type InventoryItem } from "@/components/ui/InventoryTable";
 import { Modal } from "@/components/ui/Modal";
@@ -21,9 +21,9 @@ import Link from "next/link";
 
 type ViewMode = "grid" | "list";
 
-export default function ProductsPage() {
+function ProductsContent() {
   const { t, language } = useLanguage();
-  const tr = (en: string, id: string) => (language === "id" ? id : en);
+  const tr = useCallback((en: string, id: string) => (language === "id" ? id : en), [language]);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -198,25 +198,30 @@ export default function ProductsPage() {
     [products, handleAddToCart]
   );
 
+  // Show skeleton on initial load
+  if (isLoading && !productsData) {
+    return <ProductsSkeleton />;
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Header - Mobile first stacked layout */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">{t.products.title}</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight">{t.products.title}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             {tr("Manage your product catalog", "Kelola katalog produk Anda")}
           </p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Link href="/checkout" className="flex-1 sm:flex-none">
-            <Button variant="outline" className="w-full">
+        <div className="flex gap-2">
+          <Link href="/checkout">
+            <Button variant="outline" className="h-9 sm:h-10">
               <ShoppingCart className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">{tr("Go to Checkout", "Ke Checkout")}</span>
               <span className="sm:hidden">Checkout</span>
             </Button>
           </Link>
-          <Button onClick={() => handleOpenModal()} className="flex-1 sm:flex-none">
+          <Button onClick={() => handleOpenModal()} className="h-9 sm:h-10">
             <Plus className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">{t.products.addProduct}</span>
             <span className="sm:hidden">Add</span>
@@ -405,7 +410,7 @@ export default function ProductsPage() {
                     setFormData({ ...formData, price: Math.max(0, parseInt(e.target.value) || 0).toString() })
                   }
                   required
-                />s
+                />
                 <Input
                   label={t.products.stock}
                   type="number"
@@ -536,4 +541,49 @@ export default function ProductsPage() {
   );
 }
 
+function ProductsSkeleton() {
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <Skeleton variant="rectangular" className="h-8 sm:h-10 w-40 sm:w-48" />
+          <Skeleton variant="rectangular" className="h-3.5 sm:h-4 w-56 sm:w-64" />
+        </div>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Skeleton variant="rectangular" className="h-9 sm:h-10 flex-1 sm:flex-none w-full sm:w-32 rounded-lg" />
+          <Skeleton variant="rectangular" className="h-9 sm:h-10 flex-1 sm:flex-none w-full sm:w-32 rounded-lg" />
+        </div>
+      </div>
 
+      {/* Filters */}
+      <Card>
+        <CardContent className="pt-4 sm:pt-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Skeleton variant="rectangular" className="h-10 flex-1 rounded-lg" />
+            <Skeleton variant="rectangular" className="h-10 w-full sm:w-48 rounded-lg" />
+            <div className="flex gap-2">
+              <Skeleton variant="rectangular" className="h-10 w-10 rounded-lg" />
+              <Skeleton variant="rectangular" className="h-10 w-10 rounded-lg" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Products Grid Skeleton */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Skeleton key={i} variant="rectangular" className="h-64 sm:h-72" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<ProductsSkeleton />}>
+      <ProductsContent />
+    </Suspense>
+  );
+}

@@ -10,6 +10,7 @@ import transactionRoutes from './routes/transactions';
 import purchaseRoutes from './routes/purchases';
 import reportRoutes from './routes/reports';
 import userRoutes from './routes/users';
+import storeRoutes from './routes/store';
 
 export const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/purchases', purchaseRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/store', storeRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Waroeng API is running' });

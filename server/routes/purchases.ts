@@ -5,6 +5,8 @@ import { Purchase } from "../models/Purchase";
 import { Product } from "../models/Product";
 import { Supplier } from "../models/Supplier";
 import { History } from "../models/History";
+import { StoreBalance } from "../models/StoreBalance";
+import { BalanceTransaction } from "../models/BalanceTransaction";
 import { protect, AuthRequest } from "../middleware/auth";
 import { validateRequest } from "../utils/validator";
 
@@ -106,6 +108,40 @@ router.post(
           });
         }
       }
+
+      // Deduct from store balance
+      let storeBalance = await StoreBalance.findOne().sort({ createdAt: -1 });
+      if (!storeBalance) {
+        storeBalance = await StoreBalance.create({ balance: 0 });
+      }
+
+      const balanceBefore = storeBalance.balance;
+      
+      if (balanceBefore < totalAmount) {
+        // Rollback: delete the purchase
+        await Purchase.findByIdAndDelete(purchase._id);
+        
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient store balance. Current balance: ${balanceBefore}, Required: ${totalAmount}`
+        });
+      }
+
+      const balanceAfter = balanceBefore - totalAmount;
+
+      storeBalance.balance = balanceAfter;
+      storeBalance.lastUpdated = new Date();
+      await storeBalance.save();
+
+      await BalanceTransaction.create({
+        type: 'purchase',
+        amount: totalAmount,
+        balanceBefore,
+        balanceAfter,
+        description: `Purchase from ${supplier.name}`,
+        referenceId: purchase._id,
+        referenceType: 'purchase',
+      });
 
       res.status(201).json({
         success: true,
