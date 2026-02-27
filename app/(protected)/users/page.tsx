@@ -127,7 +127,7 @@ function UsersContent() {
             <p className="text-xs sm:text-sm text-muted-foreground py-8 sm:py-10 text-center italic">{tr("No users found", "Pengguna tidak ditemukan")}</p>
           ) : (
             <div className="overflow-x-auto rounded-xl border border-border shadow-sm">
-              <table className="w-full min-w-[500px]">
+              <table className="w-full min-w-125">
                 <thead className="bg-muted/50 border-b border-border">
                   <tr>
                     <th className="px-3 sm:px-4 py-2.5 sm:py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">

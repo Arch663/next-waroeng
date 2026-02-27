@@ -87,7 +87,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen flex bg-linear-to-br from-background via-background to-muted/20">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] pointer-events-none" />
 
@@ -118,7 +118,7 @@ export default function RegisterPage() {
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
                 {tr("Create Your", "Buat")}
                 <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-primary/60">
                   {tr("Free Account", "Akun Gratis")}
                 </span>
               </h1>
@@ -156,7 +156,7 @@ export default function RegisterPage() {
                 { value: "99.9%", label: tr("Uptime", "Uptime") },
                 { value: "24/7", label: tr("Support", "Dukungan") },
               ].map((stat, i) => (
-                <div key={i} className="text-center p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 border border-primary/10">
+                <div key={i} className="text-center p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-linear-to-br from-primary/5 via-primary/10 to-primary/5 border border-primary/10">
                   <p className="text-xl sm:text-2xl font-bold text-primary">{stat.value}</p>
                   <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
                 </div>
@@ -171,7 +171,7 @@ export default function RegisterPage() {
               <div className="relative backdrop-blur-xl bg-card/80 border border-border/50 rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-8 shadow-2xl shadow-primary/5">
                 {/* Header */}
                 <div className="text-center mb-5 sm:mb-6">
-                  <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary to-primary/80 mb-3 sm:mb-4 shadow-lg shadow-primary/20">
+                  <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-linear-to-br from-primary to-primary/80 mb-3 sm:mb-4 shadow-lg shadow-primary/20">
                     <Package className="h-6 w-6 sm:h-7 sm:w-7 text-primary-foreground" />
                   </div>
                   <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground mb-2">
@@ -298,7 +298,7 @@ export default function RegisterPage() {
 
                   <Button
                     type="submit"
-                    className="w-full h-11 sm:h-12 text-sm font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all duration-200 bg-gradient-to-r from-primary to-primary/90 mt-2"
+                    className="w-full h-11 sm:h-12 text-sm font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all duration-200 bg-linear-to-r from-primary to-primary/90 mt-2"
                     size="md"
                     isLoading={isLoading}
                   >
@@ -318,8 +318,8 @@ export default function RegisterPage() {
               </div>
 
               {/* Decorative elements */}
-              <div className="absolute -top-3 -right-3 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-2xl pointer-events-none" />
-              <div className="absolute -bottom-3 -left-3 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute -top-3 -right-3 w-20 h-20 sm:w-24 sm:h-24 bg-linear-to-br from-primary/20 to-transparent rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute -bottom-3 -left-3 w-20 h-20 sm:w-24 sm:h-24 bg-linear-to-tr from-primary/20 to-transparent rounded-full blur-2xl pointer-events-none" />
             </div>
           </div>
         </div>

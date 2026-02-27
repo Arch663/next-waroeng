@@ -444,7 +444,7 @@ function PurchasesContent() {
             <select
               value={selectedSupplier}
               onChange={(e) => setSelectedSupplier(e.target.value)}
-              className="w-full px-4 py-2.5 bg-card border border-input rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full px-4 py-2.5 bg-card border border-input rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring "
             >
               <option value="">{t.suppliers.selectSupplier}</option>
               {suppliers.map((s) => (

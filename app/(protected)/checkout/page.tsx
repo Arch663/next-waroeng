@@ -285,7 +285,7 @@ function CheckoutContent() {
                                     <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{tr("Total", "Total")}</span>
                                     <span className="text-lg sm:text-xl font-bold text-primary">{formatCurrency(totalAmount)}</span>
                                 </div>
-                                <Button className="w-full h-10 sm:h-11 sm:h-12 rounded-lg font-semibold" size="md" disabled={items.length === 0} onClick={() => setIsCheckoutModalOpen(true)}>
+                                <Button className="w-full h-10 sm:h-12 rounded-lg font-semibold" size="md" disabled={items.length === 0} onClick={() => setIsCheckoutModalOpen(true)}>
                                     {tr("Payment", "Bayar Sekarang")}
                                 </Button>
                             </div>
@@ -379,7 +379,7 @@ function CheckoutContent() {
                             value={cashPaid} 
                             onChange={handleCashPaidChange} 
                             placeholder="0" 
-                            className="h-10 sm:h-11 sm:h-12 text-base sm:text-lg font-bold" 
+                            className="h-10 sm:h-12 text-base sm:text-lg font-bold" 
                         />
                     </div>
                     {cashPaid && parseToNumber(cashPaid) >= totalAmount && (
